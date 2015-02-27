@@ -122,13 +122,13 @@ def test_inject_webassets(tempdir):
     # md5 hash of the javascript files included
     injected_html = (
         '<script type="text/javascript" '
-        'src="assets/bundles/common.bundle.js?ddc71aa3"></script></html>')
+        'src="/assets/bundles/common.bundle.js?ddc71aa3"></script></html>')
 
     assert injected_html in client.get('?bundle=common').text
 
     injected_html = (
         '<link rel="stylesheet" type="text/css" '
-        'href="assets/bundles/theme.bundle.css?32fda411"></head>')
+        'href="/assets/bundles/theme.bundle.css?32fda411"></head>')
 
     assert injected_html in client.get('?bundle=theme').text
 

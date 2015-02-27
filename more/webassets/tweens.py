@@ -37,7 +37,8 @@ class InjectorTween(object):
 
                 if suffix and not filename.endswith(suffix):
                     continue
-                yield url
+
+                yield '/' + url
 
     def __call__(self, request):
         response = self.handler(request)
@@ -87,7 +88,7 @@ class PublisherTween(object):
         if publisher_signature != self.environment.url:
             return self.handler(request)
 
-        subpath = request.path.replace(publisher_signature, '').strip('/')
+        subpath = request.path_info.replace(publisher_signature, '').strip('/')
 
         asset = os.path.join(self.environment.directory, subpath)
         asset = os.path.abspath(asset)

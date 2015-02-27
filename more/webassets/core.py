@@ -131,7 +131,7 @@ class WebassetsApp(App):
 
 
 @WebassetsApp.tween_factory()
-def get_webassets_injector_tween(app, handler):
+def webassets_injector_tween(app, handler):
     """ Wraps the response with the injector and the publisher tween.
 
     See :class:`webassets.tweens.InjectorTween` and
