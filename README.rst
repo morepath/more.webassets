@@ -24,6 +24,50 @@ If you are alreay familiar with webassets: This package might not be as
 powerful as you're used to. It currently has little flexibility. It's also
 the first time the author uses webassets, so things might be off.
 
+Usage
+-----
+
+To get a basic application that serves webassets under `/assets/*`::
+
+    from morepath import reify
+    from more.webassets import WebassetsApp
+
+    class MyApp(WebassetsApp):
+
+        @reify
+        def webassets_bundles(self):
+            return {
+                'jquery': Bundle(
+                    'jquery.js',
+                    filters='jsmin',
+                    output='bundles/jquery.bundle.js'
+                )
+            }
+
+    @MyApp.path('')
+    class Root(object):
+        pass
+
+
+    @MyApp.html(model=Root):
+    def index(self, request):
+        request.include('jquery')
+
+        return '<html><head></head><body>hello</body></html>'
+
+This will result in the following html (formatted for readability)::
+
+    <html>
+        <head></head>
+        <body>hello</body>
+        <script type="text/javascript" 
+            src="./assets/bundles/jquery.bundle.js?1234" 
+        />
+    </html>
+
+For it to work you need an 'assets' folder with a 'jquery.js' file in the
+same folder as your python file where 'MyApp' is defined.
+
 Run the Tests
 -------------
 
