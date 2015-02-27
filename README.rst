@@ -3,15 +3,13 @@ More Webassets
 
 Integrates Webassets into Morepath.
 
-`Webassets: <https://webassets.readthedocs.org/en/latest/>`_
-
-`Morepath: <http://morepath.readthedocs.org/en/latest/>`_
+`Webassets <https://webassets.readthedocs.org/en/latest/>`_ |
+`Morepath <http://morepath.readthedocs.org/en/latest/>`_
 
 This package is somewhat similar to
 `more.static <https://github.com/morepath/more.static>`_, which integrates
 `bowerstatic <https://bowerstatic.readthedocs.org/en/latest/>`_ into Morepath.
-
-This is currently not really used anywhere, so you should probably stick to
+It is currently not really used anywhere, so you should probably stick to
 `more.static <https://github.com/morepath/more.static>`_.
 
 Now that you are sufficently discouraged from using more.webassets, these are
