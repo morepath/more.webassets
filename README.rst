@@ -63,9 +63,7 @@ This will result in the following html (formatted for readability):
     <html>
         <head></head>
         <body>hello</body>
-        <script type="text/javascript"
-            src="./assets/bundles/jquery.bundle.js?1234"
-        />
+        <script type="text/javascript" src="./assets/bundles/jquery.bundle.js?1234"></script>
     </html>
 
 For it to work you need an 'assets' folder with a 'jquery.js' file in the
