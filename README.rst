@@ -27,7 +27,9 @@ the first time the author uses webassets, so things might be off.
 Usage
 -----
 
-To get a basic application that serves webassets under `/assets/*`::
+To get a basic application that serves webassets under `/assets/*`:
+
+.. code-block:: python
 
     from morepath import reify
     from more.webassets import WebassetsApp
@@ -48,20 +50,21 @@ To get a basic application that serves webassets under `/assets/*`::
     class Root(object):
         pass
 
-
     @MyApp.html(model=Root):
     def index(self, request):
         request.include('jquery')
 
         return '<html><head></head><body>hello</body></html>'
 
-This will result in the following html (formatted for readability)::
+This will result in the following html (formatted for readability):
+
+.. code-block:: html
 
     <html>
         <head></head>
         <body>hello</body>
-        <script type="text/javascript" 
-            src="./assets/bundles/jquery.bundle.js?1234" 
+        <script type="text/javascript"
+            src="./assets/bundles/jquery.bundle.js?1234"
         />
     </html>
 
