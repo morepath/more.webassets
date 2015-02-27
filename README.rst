@@ -33,6 +33,7 @@ To get a basic application that serves webassets under `/assets/*`:
 
     from morepath import reify
     from more.webassets import WebassetsApp
+    from webassets import Bundle
 
     class MyApp(WebassetsApp):
 
