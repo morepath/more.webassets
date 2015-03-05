@@ -46,6 +46,9 @@ class InjectorTween(object):
         if request.method not in METHODS:
             return response
 
+        if not response.content_type:  # may be None if the code is != 200
+            return response
+
         if response.content_type.lower() not in CONTENT_TYPES:
             return response
 
