@@ -94,15 +94,15 @@ More Webassets uses `Semantic Versioning <http://semver.org/>`_
 Build Status
 ------------
 
-.. image:: https://travis-ci.org/seantis/more.webassets.png
-  :target: https://travis-ci.org/seantis/more.webassets
+.. image:: https://travis-ci.org/morepath/more.webassets.png
+  :target: https://travis-ci.org/morepath/more.webassets
   :alt: Build Status
 
 Coverage
 --------
 
-.. image:: https://coveralls.io/repos/seantis/more.webassets/badge.png?branch=master
-  :target: https://coveralls.io/r/seantis/more.webassets?branch=master
+.. image:: https://coveralls.io/repos/morepath/more.webassets/badge.png?branch=master
+  :target: https://coveralls.io/r/morepath/more.webassets?branch=master
   :alt: Project Coverage
 
 Latests PyPI Release
