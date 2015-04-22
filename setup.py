@@ -35,6 +35,7 @@ setup(
     platforms='any',
     install_requires=[
         'morepath',
+        'ordered-set',
         'webassets',
         'webob'
     ],

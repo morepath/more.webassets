@@ -5,6 +5,7 @@ from more.webassets.tweens import InjectorTween, PublisherTween
 from morepath.request import Request
 from morepath.reify import reify
 from morepath.app import App
+from ordered_set import OrderedSet
 from webassets import Environment
 
 
@@ -17,6 +18,9 @@ class IncludeRequest(Request):
     Including a bundle multiple times will have the same result as
     including it once.
 
+    The bundles are rendered in the order in which they were included. Bundles
+    that are included first, are also rendered first.
+
     For example:
 
         @App.html(model=Model)
@@ -27,7 +31,7 @@ class IncludeRequest(Request):
 
     def __init__(self, *args, **kwargs):
         super(IncludeRequest, self).__init__(*args, **kwargs)
-        self.included_assets = set()
+        self.included_assets = OrderedSet()
 
     def include(self, resource):
         self.included_assets.add(resource)

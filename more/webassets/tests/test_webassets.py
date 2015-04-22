@@ -38,6 +38,11 @@ def prepare_fixtures(directory):
             }
         """)
 
+    with open(os.path.join(directory, 'common', 'extra.js'), 'w') as f:
+        f.write("""
+            $(document).ready(function(){});
+        """)
+
 
 def spawn_test_app(tempdir):
     prepare_fixtures(tempdir)
@@ -79,6 +84,11 @@ def spawn_test_app(tempdir):
                     'theme/main.scss',
                     filters='pyscss',
                     output='bundles/theme.bundle.css'
+                ),
+                'extra': Bundle(
+                    'common/extra.js',
+                    filters='rjsmin',
+                    output='bundles/extra.bundle.js'
                 )
             }
 
@@ -103,6 +113,12 @@ def spawn_test_app(tempdir):
     @TestApp.html(model=Root, name='put', request_method='PUT')
     def put(self, request):
         request.include('common')
+        return html
+
+    @TestApp.html(model=Root, name='alljs')
+    def alljs(self, request):
+        request.include('common')
+        request.include('extra')
         return html
 
     config.commit()
@@ -131,6 +147,9 @@ def test_inject_webassets(tempdir):
         'href="/assets/bundles/theme.bundle.css?32fda411"></head>')
 
     assert injected_html in client.get('?bundle=theme').text
+
+    page = client.get('/alljs').text
+    assert page.find('common.bundle.js') < page.find('extra.bundle.js')
 
 
 def test_publish_webassets(tempdir):
