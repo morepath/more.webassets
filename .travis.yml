@@ -15,8 +15,8 @@ after_success:
 deploy:
     provider: pypi
     user: seantis
-password:
-    secure: IMa00gAAWaRAPhaLe0UqonbaW9dT7vyKTvpjrIGrlb3TkFmej2BoKxRjgMHvfWUQA2pR/2iDOgQF5o203Aox2ByAeBge0dVwRRWyaTkgIBJGL3yHDobhVUlHjjyLgP5o4K5V3frMOuNgaNelh+mzyPC6Vd3XmrN/F4HT70/GoN0=
+    password:
+        secure: IMa00gAAWaRAPhaLe0UqonbaW9dT7vyKTvpjrIGrlb3TkFmej2BoKxRjgMHvfWUQA2pR/2iDOgQF5o203Aox2ByAeBge0dVwRRWyaTkgIBJGL3yHDobhVUlHjjyLgP5o4K5V3frMOuNgaNelh+mzyPC6Vd3XmrN/F4HT70/GoN0=
     distributions: "sdist bdist_wheel"
     on:
         tags: true
