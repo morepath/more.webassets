@@ -41,8 +41,8 @@ setup(
     ],
     extras_require=dict(
         test=[
+            'coverage',
             'pytest',
-            'pytest-cov',
             'webtest',
             'pyscss'
         ],
