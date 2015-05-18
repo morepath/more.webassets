@@ -5,7 +5,7 @@ import pytest
 
 from datetime import datetime
 from more.webassets import WebassetsApp
-from more.webassets.tweens import is_subpath
+from more.webassets.tweens import is_subpath, has_insecure_path_element
 from webassets import Bundle
 from webtest import TestApp as Client
 
@@ -214,3 +214,11 @@ def test_is_subpath(tempdir):
     assert not is_subpath('/asdf/', '/asdf')
     assert not is_subpath('/a', '/b')
     assert not is_subpath('/a', '/a/../b')
+
+
+def test_insecure_path_element():
+    assert has_insecure_path_element('../test.txt')
+    assert has_insecure_path_element('./test.txt')
+    assert has_insecure_path_element('/test.txt')
+    assert not has_insecure_path_element('test.txt')
+    assert not has_insecure_path_element('asdf/asdf/test.txt')

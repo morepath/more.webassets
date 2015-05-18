@@ -5,12 +5,26 @@ import webob
 from datetime import timedelta
 from webob.static import FileApp
 
+try:
+    from urllib import unquote
+except ImportError:
+    from urllib.parse import unquote
+
+
 # content types and methods that get handled by the injector/publisher
 CONTENT_TYPES = {'text/html', 'application/xhtml+xml'}
 METHODS = {'GET', 'POST', 'HEAD'}
 
 # arbitrarily define forever as 10 years in the future
 FOREVER = timedelta(days=365 * 10).total_seconds()
+
+
+# what separators does this operating system provide that are not a slash?
+_os_alt_seps = set(sep for sep in [os.path.sep, os.path.altsep]
+                   if sep not in (None, '/'))
+
+# what elements may not be in a path element?
+_insecure_elements = set(['..', '.', '']) | _os_alt_seps
 
 
 def is_subpath(directory, path):
@@ -21,6 +35,16 @@ def is_subpath(directory, path):
     # return true, if the common prefix of both is equal to directory
     # e.g. /a/b/c/d.rst and directory is /a/b, the common prefix is /a/b
     return os.path.commonprefix([path, directory]) == directory
+
+
+def has_insecure_path_element(path):
+    """ Returns true if the given path contains an insecure path element.
+    That is '..' or '.' or ''
+    """
+    if _insecure_elements.intersection(path.split('/')):
+        return True
+
+    return False
 
 
 class InjectorTween(object):
@@ -92,6 +116,10 @@ class PublisherTween(object):
             return self.handler(request)
 
         subpath = request.path_info.replace(publisher_signature, '').strip('/')
+        subpath = unquote(subpath)
+
+        if has_insecure_path_element(subpath):
+            return webob.exc.HTTPNotFound()
 
         asset = os.path.join(self.environment.directory, subpath)
         asset = os.path.abspath(asset)
