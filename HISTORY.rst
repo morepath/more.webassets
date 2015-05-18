@@ -4,6 +4,9 @@ Changelog
 Unreleased
 ~~~~~~~~~~
 
+0.0.2 (2015-05-18)
+~~~~~~~~~~~~~~~~~~~
+
 - Adds more checks to ensure we never serve anything outside the assets
   directory.
   [href]
