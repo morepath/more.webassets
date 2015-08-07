@@ -53,10 +53,17 @@ class InjectorTween(object):
     def __init__(self, environment, handler):
         self.environment = environment
         self.handler = handler
+        self._urls = {}
+
+    def urls_by_resource(self, resource):
+        if resource not in self._urls:
+            self._urls[resource] = self.environment[resource].urls()
+
+        return self._urls[resource]
 
     def urls_to_inject(self, request, suffix=None):
-        for ressource in request.included_assets:
-            for url in self.environment[ressource].urls():
+        for resource in request.included_assets:
+            for url in self.urls_by_resource(resource):
                 filename, filehash = url.split('?')
 
                 if suffix and not filename.endswith(suffix):

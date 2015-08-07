@@ -4,6 +4,12 @@ Changelog
 Unreleased
 ~~~~~~~~~~
 
+- Cache the resource urls for increased speed. Note that with this change a
+  reload of the application is necessary to get the updated javascript files.
+
+  If this is an issue for you, speak up and we might add a debug flag.
+  [href]
+
 0.0.2 (2015-05-18)
 ~~~~~~~~~~~~~~~~~~~
 
