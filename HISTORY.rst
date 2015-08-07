@@ -4,6 +4,9 @@ Changelog
 Unreleased
 ~~~~~~~~~~
 
+0.0.3 (2015-08-07)
+~~~~~~~~~~~~~~~~~~~
+
 - Cache the resource urls for increased speed. Note that with this change a
   reload of the application is necessary to get the updated javascript files.
 
