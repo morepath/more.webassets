@@ -74,7 +74,7 @@ Run in Debug Mode
 -----------------
 
 To activate the webassets debug mode (which disables bundling), simply add
-return the following webassets environment config::
+return the following webassets environment config:
 
 .. code-block:: python
 
