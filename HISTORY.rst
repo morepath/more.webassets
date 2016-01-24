@@ -1,9 +1,6 @@
 Changelog
 ---------
 
-Unreleased
-~~~~~~~~~~
-
 - Support webassets debug mode (before it would trigger an exception).
   [href]
 
