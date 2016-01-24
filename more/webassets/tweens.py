@@ -56,7 +56,7 @@ class InjectorTween(object):
         self._urls = {}
 
     def urls_by_resource(self, resource):
-        if resource not in self._urls:
+        if self.environment.debug or resource not in self._urls:
             self._urls[resource] = self.environment[resource].urls()
 
         return self._urls[resource]
