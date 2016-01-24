@@ -1,6 +1,9 @@
 Changelog
 ---------
 
+0.1.1 (2016-01-24)
+~~~~~~~~~~~~~~~~~~~
+
 - Disables webassets url caching if debug mode is active.
   [href]
 
