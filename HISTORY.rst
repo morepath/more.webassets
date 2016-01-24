@@ -1,6 +1,9 @@
 Changelog
 ---------
 
+0.1.0 (2016-01-24)
+~~~~~~~~~~~~~~~~~~~
+
 - Support webassets debug mode (before it would trigger an exception).
   [href]
 
