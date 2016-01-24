@@ -70,6 +70,25 @@ This will result in the following html (formatted for readability):
 For it to work you need an 'assets' folder with a 'jquery.js' file in the
 same folder as your python file where 'MyApp' is defined.
 
+Run in Debug Mode
+-----------------
+
+To activate the webassets debug mode (which disables bundling), simply add
+return the following webassets environment config::
+
+.. code-block:: python
+
+    from morepath import reify
+    from more.webassets import WebassetsApp
+
+    class MyApp(WebassetsApp):
+
+        @reify
+        def webassets_environment_config(self):
+            return {
+                'debug': True
+            }
+
 Run the Tests
 -------------
 

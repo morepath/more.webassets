@@ -4,6 +4,9 @@ Changelog
 Unreleased
 ~~~~~~~~~~
 
+- Support webassets debug mode (before it would trigger an exception).
+  [href]
+
 0.0.3 (2015-08-07)
 ~~~~~~~~~~~~~~~~~~~
 
