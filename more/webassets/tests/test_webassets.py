@@ -47,9 +47,6 @@ def prepare_fixtures(directory):
 def spawn_test_app(tempdir):
     prepare_fixtures(tempdir)
 
-    config = morepath.setup()
-    config.scan(more.webassets)
-
     html = """
         <html>
             <head></head>
@@ -65,7 +62,7 @@ def spawn_test_app(tempdir):
         return response
 
     class TestApp(WebassetsApp):
-        testing_config = config
+        pass
 
         @morepath.reify
         def webassets_path(self):
@@ -121,7 +118,8 @@ def spawn_test_app(tempdir):
         request.include('extra')
         return html
 
-    config.commit()
+    morepath.scan(more.webassets)
+    morepath.commit([TestApp])
 
     return TestApp()
 
@@ -180,13 +178,12 @@ def test_publish_webassets(tempdir):
 
 
 def test_webassets_defaults():
-    config = morepath.setup()
-    config.scan(more.webassets)
 
     class TestApp(WebassetsApp):
-        testing_config = config
+        pass
 
-    config.commit()
+    morepath.scan(more.webassets)
+    morepath.commit([TestApp])
 
     app = TestApp()
 
