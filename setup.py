@@ -6,7 +6,7 @@ name = 'more.webassets'
 description = (
     'Integrates Webassets into Morepath.'
 )
-version = '0.1.1'
+version = '0.2.0'
 
 
 def get_long_description():
