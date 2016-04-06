@@ -119,7 +119,7 @@ def spawn_test_app(tempdir):
         return html
 
     morepath.scan(more.webassets)
-    morepath.commit([TestApp])
+    morepath.commit(TestApp)
 
     return TestApp()
 
@@ -183,7 +183,7 @@ def test_webassets_defaults():
         pass
 
     morepath.scan(more.webassets)
-    morepath.commit([TestApp])
+    morepath.commit(TestApp)
 
     app = TestApp()
 
