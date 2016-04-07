@@ -143,3 +143,141 @@ def test_webasset_directive(tempdir, fixtures_path):
             filters={}
         )
     }
+
+    common = list(app.config.webasset_registry.get_bundles('common'))
+
+    assert len(common) == 1
+    assert common[0].output.endswith('common.bundle.js')
+    assert common[0].contents == (
+        os.path.join(fixtures_path, 'jquery.js'),
+        os.path.join(fixtures_path, 'underscore.js')
+    )
+
+    jquery = list(app.config.webasset_registry.get_bundles('jquery.js'))
+
+    assert len(jquery) == 1
+    assert jquery[0].output.endswith('jquery.js.bundle.js')
+    assert jquery[0].contents == (
+        os.path.join(fixtures_path, 'jquery.js'),
+    )
+
+    underscore = list(
+        app.config.webasset_registry.get_bundles('underscore.js'))
+
+    assert len(underscore) == 1
+    assert underscore[0].output.endswith('underscore.js.bundle.js')
+    assert underscore[0].contents == (
+        os.path.join(fixtures_path, 'underscore.js'),
+    )
+
+
+def test_webasset_override_filters(tempdir, fixtures_path):
+
+    class App(WebassetsApp):
+        pass
+
+    @App.webasset_path()
+    def get_path():
+        yield fixtures_path
+
+    @App.webasset_output()
+    def get_output_path():
+        return tempdir
+
+    @App.webasset('jquery')
+    def get_jquery_asset():
+        yield 'jquery.js'
+
+    @App.webasset_filter('js')
+    def get_js_filter():
+        return 'rjsmin'
+
+    class DebugApp(App):
+        pass
+
+    @DebugApp.webasset_filter('js')
+    def get_debug_js_filter():
+        return None
+
+    morepath.commit(DebugApp, App)
+
+    bundles = list(App().config.webasset_registry.get_bundles('jquery'))
+    assert len(bundles) == 1
+    assert bundles[0].filters[0].name == 'rjsmin'
+
+    bundles = list(DebugApp().config.webasset_registry.get_bundles('jquery'))
+    assert len(bundles) == 1
+    assert not bundles[0].filters
+
+
+def test_webasset_override_filter_through_bundle(tempdir, fixtures_path):
+
+    class App(WebassetsApp):
+        pass
+
+    @App.webasset_path()
+    def get_path():
+        yield fixtures_path
+
+    @App.webasset_output()
+    def get_output_path():
+        return tempdir
+
+    @App.webasset('jquery')
+    def get_jquery_asset():
+        yield 'jquery.js'
+
+    @App.webasset_filter('js')
+    def get_js_filter():
+        return 'rjsmin'
+
+    class DebugApp(App):
+        pass
+
+    @DebugApp.webasset('common', filters={'js': None})
+    def get_debug_js_filter():
+        yield 'jquery'
+
+    morepath.commit(DebugApp, App)
+
+    bundles = list(App().config.webasset_registry.get_bundles('jquery'))
+    assert len(bundles) == 1
+    assert bundles[0].filters[0].name == 'rjsmin'
+
+    bundles = list(DebugApp().config.webasset_registry.get_bundles('common'))
+    assert len(bundles) == 1
+    assert not bundles[0].filters
+
+
+def test_webasset_mixed_bundles(tempdir, fixtures_path):
+
+    class App(WebassetsApp):
+        pass
+
+    @App.webasset_path()
+    def get_path():
+        yield fixtures_path
+
+    @App.webasset_output()
+    def get_output_path():
+        return tempdir
+
+    @App.webasset('common')
+    def get_jquery_asset():
+        yield 'jquery.js'
+        yield 'extra.css'
+
+    morepath.commit(App)
+
+    bundles = list(App().config.webasset_registry.get_bundles('common'))
+    assert len(bundles) == 2
+
+    assert bundles[0].output.endswith('jquery.js.bundle.js')
+    assert bundles[0].contents == (
+        os.path.join(fixtures_path, 'jquery.js'),
+    )
+
+    assert bundles[1].output.endswith('extra.css.bundle.css')
+    assert bundles[1].contents == (
+        os.path.join(fixtures_path, 'extra.css'),
+    )
