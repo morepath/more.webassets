@@ -57,6 +57,16 @@ class WebassetRegistry(object):
         self.assets = {}
         self.output_path = None
         self.cached_bundles = {}
+        self.mapping = {
+            'coffee': 'js',
+            'dust': 'js',
+            'jst': 'js',
+            'jsx': 'js',
+            'less': 'css',
+            'sass': 'css',
+            'scss': 'css',
+            'ts': 'js',
+        }
 
     def register_path(self, path):
         assert os.path.isabs(path), "absolute paths only"
@@ -137,13 +147,14 @@ class WebassetRegistry(object):
                 files = (
                     a.path for a in (self.assets[a] for a in asset.assets))
 
+            extension = self.mapping.get(asset.extension, asset.extension)
+            assert extension in ('js', 'css')
+
             yield Bundle(
                 *files,
                 filters=filters.get(asset.extension),
                 output=os.path.join(
-                    self.output_path, '{}.bundle.{}'.format(
-                        name, asset.extension
-                    )
+                    self.output_path, '{}.bundle.{}'.format(name, extension)
                 ))
         else:
             for sub in (self.assets[a] for a in asset.assets):
@@ -206,10 +217,25 @@ class WebassetOutput(Action):
         webasset_registry.output_path = obj()
 
 
+@WebassetsApp.directive('webasset_mapping')
+class WebassetMapping(Action):
+
+    group_class = WebassetPath
+
+    def __init__(self, name):
+        self.name = name
+
+    def identifier(self, webasset_registry):
+        return self.name
+
+    def perform(self, obj, webasset_registry):
+        webasset_registry.mapping[self.name] = obj()
+
+
 @WebassetsApp.directive('webasset')
 class Webasset(Action):
 
-    dependes = [WebassetPath, WebassetFilter, WebassetOutput]
+    dependes = [WebassetPath, WebassetFilter, WebassetOutput, WebassetMapping]
     group_class = WebassetPath
 
     def __init__(self, name, filters=None):

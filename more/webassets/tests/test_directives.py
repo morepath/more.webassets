@@ -281,3 +281,41 @@ def test_webasset_mixed_bundles(tempdir, fixtures_path):
     assert bundles[1].contents == (
         os.path.join(fixtures_path, 'extra.css'),
     )
+
+
+def test_webasset_compiled_bundle(tempdir, fixtures_path):
+
+    class App(WebassetsApp):
+        pass
+
+    @App.webasset_path()
+    def get_path():
+        yield fixtures_path
+
+    @App.webasset_output()
+    def get_output_path():
+        return tempdir
+
+    @App.webasset_filter('scss')
+    def get_scss_filter():
+        return 'pyscss'
+
+    @App.webasset('theme')
+    def get_jquery_asset():
+        yield 'main.scss'
+        yield 'extra.css'
+
+    morepath.commit(App)
+
+    bundles = list(App().config.webasset_registry.get_bundles('theme'))
+    assert len(bundles) == 2
+
+    assert bundles[0].output.endswith('main.scss.bundle.css')
+    assert bundles[0].contents == (
+        os.path.join(fixtures_path, 'main.scss'),
+    )
+
+    assert bundles[1].output.endswith('extra.css.bundle.css')
+    assert bundles[1].contents == (
+        os.path.join(fixtures_path, 'extra.css'),
+    )
