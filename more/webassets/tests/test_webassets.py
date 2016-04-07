@@ -6,13 +6,12 @@ import pytest
 from datetime import datetime
 from more.webassets import WebassetsApp
 from more.webassets.tweens import is_subpath, has_insecure_path_element
-from webassets import Bundle
 from webtest import TestApp as Client
 
 
 def prepare_fixtures(directory):
     os.mkdir(os.path.join(directory, 'common'))
-    os.mkdir(os.path.join(directory, 'bundles'))
+    os.mkdir(os.path.join(directory, 'output'))
     os.mkdir(os.path.join(directory, 'theme'))
 
     # if those javascripts are changed, the tests below need to be updated
@@ -35,6 +34,13 @@ def prepare_fixtures(directory):
                 a {
                     color: blue;
                 }
+            }
+        """)
+
+    with open(os.path.join(directory, 'theme', 'other.css'), 'w') as f:
+        f.write("""
+            h1 {
+                font-size: 2rem;
             }
         """)
 
@@ -61,39 +67,47 @@ def spawn_test_app(tempdir):
         response.content_type = 'text/plain'
         return response
 
-    class TestApp(WebassetsApp):
+    class App(WebassetsApp):
         pass
 
-        @morepath.reify
-        def webassets_path(self):
-            return tempdir
+    @App.webasset_path()
+    def get_default_assets_path():
+        yield os.path.join(tempdir, 'common')
 
-        @morepath.reify
-        def webassets_bundles(self):
-            return {
-                'common': Bundle(
-                    'common/jquery.js',
-                    'common/underscore.js',
-                    filters='rjsmin',
-                    output='bundles/common.bundle.js'
-                ),
-                'theme': Bundle(
-                    'theme/main.scss',
-                    filters='pyscss',
-                    output='bundles/theme.bundle.css'
-                ),
-                'extra': Bundle(
-                    'common/extra.js',
-                    filters='rjsmin',
-                    output='bundles/extra.bundle.js'
-                )
-            }
+    @App.webasset_path()
+    def get_theme_assets_path():
+        yield os.path.join(tempdir, 'theme')
 
-    @TestApp.path('')
+    @App.webasset_output_path()
+    def get_output_path():
+        yield os.path.join(tempdir, 'output')
+
+    @App.webasset_filter('js')
+    def get_js_filter():
+        return 'rjsmin'
+
+    @App.webasset_filter('scss')
+    def get_scss_filter():
+        return 'pyscss'
+
+    @App.webasset(name='common')
+    def get_common_assets():
+        yield 'jquery.js'
+        yield 'underscore.js'
+
+    @App.webasset(name='extra')
+    def get_extra_asset():
+        yield 'extra.js'
+
+    @App.webasset(name='theme')
+    def get_theme_asset():
+        yield 'main.scss'
+
+    @App.path('')
     class Root(object):
         pass
 
-    @TestApp.html(model=Root)
+    @App.html(model=Root)
     def index(self, request):
         bundle = request.params.get('bundle')
 
@@ -102,26 +116,26 @@ def spawn_test_app(tempdir):
 
         return html
 
-    @TestApp.view(model=Root, name='plain', render=render_plain)
+    @App.view(model=Root, name='plain', render=render_plain)
     def plain(self, request):
         request.include('common')
         return html
 
-    @TestApp.html(model=Root, name='put', request_method='PUT')
+    @App.html(model=Root, name='put', request_method='PUT')
     def put(self, request):
         request.include('common')
         return html
 
-    @TestApp.html(model=Root, name='alljs')
+    @App.html(model=Root, name='alljs')
     def alljs(self, request):
         request.include('common')
         request.include('extra')
         return html
 
     morepath.scan(more.webassets)
-    morepath.commit(TestApp)
+    morepath.commit(App)
 
-    return TestApp()
+    return App()
 
 
 def test_inject_webassets(tempdir):

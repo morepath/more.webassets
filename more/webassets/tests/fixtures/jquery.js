@@ -1,0 +1,2 @@
+/* fake jquery */
+var $ = function(){};
