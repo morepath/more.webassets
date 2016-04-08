@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 name = 'more.webassets'
 description = (
-    'Integrates Webassets into Morepath.'
+    'An opinionated Webassets integration for Morepath.'
 )
 version = '0.2.0'
 
