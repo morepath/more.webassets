@@ -9,7 +9,8 @@ Changelog
   have applications which define assets and child-applications which use
   those assets).
 
-  Have a look at the README and at `the comments in the directives file <https://github.com/morepath/more.webassets/blob/master/more/webassets/directives.py>`_, to get an idea about what has changed.
+  Have a look at the `readme <https://github.com/morepath/more.webassets>`_ and
+  at `the comments in the directives file <https://github.com/morepath/more.webassets/blob/master/more/webassets/directives.py>`_, to get an idea about what has changed.
 
   Don't hesitate to open an issue if you need help migrating your existing
   setup.

@@ -68,8 +68,6 @@ class InjectorTween(object):
                 except (AttributeError, KeyError):
                     bundle = None
 
-            print(self._urls[resource])
-
         return self._urls[resource]
 
     def urls_to_inject(self, request, suffix=None):

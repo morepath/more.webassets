@@ -251,8 +251,17 @@ class WebassetRegistry(object):
         return env
 
 
+class PathMixin(object):
+
+    def absolute_path(self, path):
+        if os.path.isabs(path):
+            return path
+        else:
+            return os.path.join(os.path.dirname(self.code_info.path), path)
+
+
 @WebassetsApp.directive('webasset_path')
-class WebassetPath(Action):
+class WebassetPath(Action, PathMixin):
     """ Registers a path with more.webassets.
 
     Registered paths are searched for assets registered::
@@ -294,6 +303,27 @@ class WebassetPath(Action):
         webasset_registry.register_path(self.absolute_path(obj()))
 
 
+@WebassetsApp.directive('webasset_output')
+class WebassetOutput(Action, PathMixin):
+    """ Sets the output path for all bundles.
+
+    For example::
+
+        @App.webasset_output()
+        def get_output_path():
+            return 'assets/bundles'
+
+    """
+
+    group_class = WebassetPath
+
+    def identifier(self, webasset_registry):
+        return self.__class__
+
+    def perform(self, obj, webasset_registry):
+        webasset_registry.output_path = self.absolute_path(obj())
+
+
 @WebassetsApp.directive('webasset_filter')
 class WebassetFilter(Action):
     """ Registers a default filter for an extension.
@@ -323,27 +353,6 @@ class WebassetFilter(Action):
 
     def perform(self, obj, webasset_registry):
         webasset_registry.register_filter(self.name, obj())
-
-
-@WebassetsApp.directive('webasset_output')
-class WebassetOutput(Action):
-    """ Sets the output path for all bundles.
-
-    For example::
-
-        @App.webasset_output()
-        def get_output_path():
-            return 'assets/bundles'
-
-    """
-
-    group_class = WebassetPath
-
-    def identifier(self, webasset_registry):
-        return self.__class__
-
-    def perform(self, obj, webasset_registry):
-        webasset_registry.output_path = obj()
 
 
 @WebassetsApp.directive('webasset_mapping')

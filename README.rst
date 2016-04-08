@@ -45,7 +45,7 @@ The following app serves a minified jquery from `assets/js/jquery.js`
     def get_asset_path():
         return 'assets/js'
 
-    @App.webasset_output():
+    @App.webasset_output()
     def get_output_path():
         return 'assets/bundles'
 
@@ -55,13 +55,13 @@ The following app serves a minified jquery from `assets/js/jquery.js`
 
     @App.webasset('jquery')
     def get_jquery_asset():
-        return 'jquery.js'
+        yield 'jquery.js'
 
     @App.path('')
     class Root(object):
         pass
 
-    @App.html(model=Root):
+    @App.html(model=Root)
     def index(self, request):
         request.include('jquery')
 
