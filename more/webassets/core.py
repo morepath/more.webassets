@@ -111,7 +111,7 @@ class WebassetsApp(App):
     def webassets_environment(self):
         """ Returns the webassets.Environment instance.
 
-        See: `<http://webassets.readthedocs.org/en/latest/environment.html`_
+        See: `<http://webassets.readthedocs.org/en/latest/environment.html>`_
 
         """
         env = Environment(

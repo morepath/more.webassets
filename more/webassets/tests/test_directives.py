@@ -319,3 +319,82 @@ def test_webasset_compiled_bundle(tempdir, fixtures_path):
     assert bundles[1].contents == (
         os.path.join(fixtures_path, 'extra.css'),
     )
+
+
+def test_webasset_environment(tempdir, fixtures_path):
+
+    class App(WebassetsApp):
+        pass
+
+    @App.webasset_path()
+    def get_path():
+        yield fixtures_path
+
+    @App.webasset_output()
+    def get_output_path():
+        return tempdir
+
+    @App.webasset_filter('scss')
+    def get_scss_filter():
+        return 'pyscss'
+
+    @App.webasset('js')
+    def get_js_asset():
+        yield 'jquery.js'
+        yield 'underscore.js'
+
+    @App.webasset('css')
+    def get_css_asset():
+        yield 'main.scss'
+        yield 'extra.css'
+
+    @App.webasset('common')
+    def get_common_assets():
+        yield 'js'
+        yield 'css'
+
+    morepath.commit(App)
+
+    e = App().config.webasset_registry.get_environment()
+
+    for asset in ('jquery.js', 'underscore.js'):
+        assert e[asset].output.endswith('{}.bundle.js'.format(asset))
+        assert e[asset].contents == (os.path.join(fixtures_path, asset),)
+        assert len(e[asset].urls()) == 1
+
+    for asset in ('main.scss', 'extra.css'):
+        assert e[asset].output.endswith('{}.bundle.css'.format(asset))
+        assert e[asset].contents == (os.path.join(fixtures_path, asset),)
+        assert len(e[asset].urls()) == 1
+
+    assert e['js'].output.endswith('js.bundle.js')
+    assert e['js'].contents == (
+        os.path.join(fixtures_path, 'jquery.js'),
+        os.path.join(fixtures_path, 'underscore.js'),
+    )
+
+    assert len(e['js'].urls()) == 1
+
+    assert e['css'].output.endswith('css.bundle.css')
+    assert len(e['css'].contents) == 2
+    assert e['css'].contents[0].output.endswith('main.scss.bundle.css')
+    assert e['css'].contents[0].contents == (
+        os.path.join(fixtures_path, 'main.scss'),
+    )
+
+    assert e['css'].contents[1].output.endswith('extra.css.bundle.css')
+    assert e['css'].contents[1].contents == (
+        os.path.join(fixtures_path, 'extra.css'),
+    )
+
+    assert len(e['css'].urls()) == 1
+
+    assert e['common'].output.endswith('js.bundle.js')
+    assert e['common'].contents == e['js'].contents
+    assert len(e['common'].urls()) == 1
+
+    assert e['common_1'].contents[0].output == e['css'].contents[0].output
+    assert e['common_1'].contents[0].contents == e['css'].contents[0].contents
+    assert e['common_1'].contents[1].output == e['css'].contents[1].output
+    assert e['common_1'].contents[1].contents == e['css'].contents[1].contents
+    assert len(e['common_1'].urls()) == 1

@@ -3,7 +3,7 @@ import os.path
 
 from dectate import Action
 from more.webassets.core import WebassetsApp
-from webassets import Bundle
+from webassets import Bundle, Environment
 
 
 MISSING = object()
@@ -57,6 +57,8 @@ class WebassetRegistry(object):
         self.assets = {}
         self.output_path = None
         self.cached_bundles = {}
+        self.url = 'assets'
+        self.environment_config = {}
         self.mapping = {
             'coffee': 'js',
             'dust': 'js',
@@ -90,14 +92,14 @@ class WebassetRegistry(object):
 
         # and have one additional asset for each file
         for asset in assets:
-            name = os.path.basename(asset)
+            basename = os.path.basename(asset)
 
             # files are entries with an extension
-            if '.' in name:
+            if '.' in basename:
                 path = os.path.normpath(self.find_file(asset))
 
-                self.assets[name] = Asset(
-                    name=name,
+                self.assets[basename] = Asset(
+                    name=basename,
                     assets=(path, ),
                     filters=filters or self.filters
                 )
@@ -158,9 +160,51 @@ class WebassetRegistry(object):
                 ))
         else:
             for sub in (self.assets[a] for a in asset.assets):
-                if sub.is_pure:
-                    for bundle in self.get_bundles(sub.name, filters=filters):
-                        yield bundle
+                for bundle in self.get_bundles(sub.name, filters=filters):
+                    yield bundle
+
+    def get_environment(self):
+        env = Environment(
+            directory=self.output_path,
+            load_path=self.paths,
+            url=self.url
+        )
+
+        for asset in self.assets:
+            bundles = tuple(self.get_bundles(asset))
+
+            js = tuple(b for b in bundles if b.output.endswith('.js'))
+            css = tuple(b for b in bundles if b.output.endswith('.css'))
+
+            if js:
+                js_bundle = len(js) == 1 and js[0] or Bundle(
+                    *js, output=os.path.join(
+                        self.output_path, '{}.bundle.js'.format(asset)
+                    )
+                )
+            else:
+                js_bundle = None
+
+            if css:
+                css_bundle = len(css) == 1 and css[0] or Bundle(
+                    *css, output=os.path.join(
+                        self.output_path, '{}.bundle.css'.format(asset)
+                    )
+                )
+            else:
+                css_bundle = None
+
+            if js_bundle and css_bundle:
+                js_bundle.next_bundle = asset + '_1'
+                css_bundle.next_bundle = None
+                env.register(asset, js_bundle)
+                env.register(asset + '_1', css_bundle)
+            elif js_bundle:
+                env.register(asset, js_bundle)
+            else:
+                env.register(asset, css_bundle)
+
+        return env
 
 
 @WebassetsApp.directive('webasset_path')
@@ -169,9 +213,6 @@ class WebassetPath(Action):
     config = {
         'webasset_registry': WebassetRegistry
     }
-
-    def __init__(self):
-        pass
 
     def identifier(self, webasset_registry):
         return object()
@@ -207,11 +248,8 @@ class WebassetOutput(Action):
 
     group_class = WebassetPath
 
-    def __init__(self):
-        pass
-
     def identifier(self, webasset_registry):
-        return 'webasset_output'
+        return self.__class__
 
     def perform(self, obj, webasset_registry):
         webasset_registry.output_path = obj()
@@ -232,10 +270,28 @@ class WebassetMapping(Action):
         webasset_registry.mapping[self.name] = obj()
 
 
+@WebassetsApp.directive('webasset_url')
+class WebassetUrl(Action):
+
+    group_class = WebassetPath
+
+    def identifier(self, webasset_registry):
+        return self.__class__
+
+    def perform(self, obj, webasset_registry):
+        webasset_registry.url = obj()
+
+
 @WebassetsApp.directive('webasset')
 class Webasset(Action):
 
-    dependes = [WebassetPath, WebassetFilter, WebassetOutput, WebassetMapping]
+    depends = [
+        WebassetFilter,
+        WebassetMapping,
+        WebassetOutput,
+        WebassetPath,
+        WebassetUrl
+    ]
     group_class = WebassetPath
 
     def __init__(self, name, filters=None):
