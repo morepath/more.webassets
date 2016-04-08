@@ -155,9 +155,8 @@ class WebassetRegistry(object):
             yield Bundle(
                 *files,
                 filters=filters.get(asset.extension),
-                output=os.path.join(
-                    self.output_path, '{}.bundle.{}'.format(name, extension)
-                ))
+                output='{}.bundle.{}'.format(name, extension)
+            )
         else:
             for sub in (self.assets[a] for a in asset.assets):
                 for bundle in self.get_bundles(sub.name, filters=filters):
@@ -178,25 +177,20 @@ class WebassetRegistry(object):
 
             if js:
                 js_bundle = len(js) == 1 and js[0] or Bundle(
-                    *js, output=os.path.join(
-                        self.output_path, '{}.bundle.js'.format(asset)
-                    )
+                    *js, output='{}.bundle.js'.format(asset)
                 )
             else:
                 js_bundle = None
 
             if css:
                 css_bundle = len(css) == 1 and css[0] or Bundle(
-                    *css, output=os.path.join(
-                        self.output_path, '{}.bundle.css'.format(asset)
-                    )
+                    *css, output='{}.bundle.css'.format(asset)
                 )
             else:
                 css_bundle = None
 
             if js_bundle and css_bundle:
                 js_bundle.next_bundle = asset + '_1'
-                css_bundle.next_bundle = None
                 env.register(asset, js_bundle)
                 env.register(asset + '_1', css_bundle)
             elif js_bundle:
@@ -218,14 +212,13 @@ class WebassetPath(Action):
         return object()
 
     def absolute_path(self, path):
-        return os.path.join(os.path.dirname(self.code_info.path), path)
+        if os.path.isabs(path):
+            return path
+        else:
+            return os.path.join(os.path.dirname(self.code_info.path), path)
 
     def perform(self, obj, webasset_registry):
-        assert inspect.isgeneratorfunction(obj),\
-            "webasset_path expects a generator"
-
-        for path in (self.absolute_path(p) for p in obj()):
-            webasset_registry.register_path(path)
+        webasset_registry.register_path(self.absolute_path(obj()))
 
 
 @WebassetsApp.directive('webasset_filter')

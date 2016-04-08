@@ -57,7 +57,18 @@ class InjectorTween(object):
 
     def urls_by_resource(self, resource):
         if self.environment.debug or resource not in self._urls:
-            self._urls[resource] = self.environment[resource].urls()
+            self._urls[resource] = []
+
+            bundle = self.environment[resource]
+            while bundle is not None:
+                self._urls[resource].extend(bundle.urls())
+
+                try:
+                    bundle = self.environment[getattr(bundle, 'next_bundle')]
+                except (AttributeError, KeyError):
+                    bundle = None
+
+            print(self._urls[resource])
 
         return self._urls[resource]
 

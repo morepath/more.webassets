@@ -72,15 +72,15 @@ def spawn_test_app(tempdir):
 
     @App.webasset_path()
     def get_default_assets_path():
-        yield os.path.join(tempdir, 'common')
+        return os.path.join(tempdir, 'common')
 
     @App.webasset_path()
     def get_theme_assets_path():
-        yield os.path.join(tempdir, 'theme')
+        return os.path.join(tempdir, 'theme')
 
-    @App.webasset_output_path()
+    @App.webasset_output()
     def get_output_path():
-        yield os.path.join(tempdir, 'output')
+        return os.path.join(tempdir, 'output')
 
     @App.webasset_filter('js')
     def get_js_filter():
@@ -150,13 +150,13 @@ def test_inject_webassets(tempdir):
     # md5 hash of the javascript files included
     injected_html = (
         '<script type="text/javascript" '
-        'src="/assets/bundles/common.bundle.js?ddc71aa3"></script></html>')
+        'src="/assets/common.bundle.js?ddc71aa3"></script></html>')
 
     assert injected_html in client.get('?bundle=common').text
 
     injected_html = (
         '<link rel="stylesheet" type="text/css" '
-        'href="/assets/bundles/theme.bundle.css?32fda411"></head>')
+        'href="/assets/theme.bundle.css?32fda411"></head>')
 
     assert injected_html in client.get('?bundle=theme').text
 
@@ -167,7 +167,7 @@ def test_inject_webassets(tempdir):
 def test_publish_webassets(tempdir):
     client = Client(spawn_test_app(tempdir))
 
-    url = '/assets/bundles/common.bundle.js?ddc71aa3'
+    url = '/assets/common.bundle.js?ddc71aa3'
 
     # before the urls() have not been called by the injector, the bundles
     # won't have been created
@@ -180,7 +180,7 @@ def test_publish_webassets(tempdir):
     assert client.get(url).content_type == 'text/javascript'
 
     # do the same for css
-    url = '/assets/bundles/theme.bundle.css?32fda411'
+    url = '/assets/theme.bundle.css?32fda411'
 
     assert client.get(url, expect_errors=True).status_code == 404
 
@@ -189,22 +189,6 @@ def test_publish_webassets(tempdir):
     assert client.get(url).text == 'body a {\n  color: blue; }\n'
     assert client.get(url).expires.year == datetime.utcnow().year + 10
     assert client.get(url).content_type == 'text/css'
-
-
-def test_webassets_defaults():
-
-    class TestApp(WebassetsApp):
-        pass
-
-    morepath.scan(more.webassets)
-    morepath.commit(TestApp)
-
-    app = TestApp()
-
-    # by default the webassets path is the 'assets' directory in the same
-    # directory as the definition of the application class
-    assert app.webassets_path.endswith('webassets/tests/assets')
-    assert app.webassets_bundles == {}
 
 
 def test_webassets_unhandled_content_type(tempdir):

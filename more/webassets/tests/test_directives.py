@@ -14,16 +14,19 @@ def test_webasset_path(current_path):
 
     @App.webasset_path()
     def get_path():
-        yield './fixtures'
+        return './fixtures'
 
     @App.webasset_path()
     def get_overlapping_path():
-        yield os.path.join(current_path, './fixtures')
+        return os.path.join(current_path, './fixtures')
 
     @App.webasset_path()
-    def get_multiple_paths():
-        yield '.'
-        yield '..'
+    def get_current_path():
+        return '.'
+
+    @App.webasset_path()
+    def get_parent_path():
+        return '..'
 
     morepath.commit(App)
 
@@ -44,28 +47,28 @@ def test_webasset_path_inheritance(current_path):
 
     @A.webasset_path()
     def get_path_a():
-        yield 'A'
+        return 'A'
 
     class B(WebassetsApp):
         pass
 
     @B.webasset_path()
     def get_path_b():
-        yield 'B'
+        return 'B'
 
     class C(B, A):
         pass
 
     @C.webasset_path()
     def get_path_c():
-        yield 'C'
+        return 'C'
 
     class D(A, B):
         pass
 
     @D.webasset_path()
     def get_path_c_2():
-        yield 'C'
+        return 'C'
 
     # the order of A and B is defined by the order they are scanned with
     morepath.commit(A, B, C, D)
@@ -111,7 +114,7 @@ def test_webasset_directive(tempdir, fixtures_path):
 
     @App.webasset_path()
     def get_path():
-        yield fixtures_path
+        return fixtures_path
 
     @App.webasset_output()
     def get_output_path():
@@ -178,7 +181,7 @@ def test_webasset_override_filters(tempdir, fixtures_path):
 
     @App.webasset_path()
     def get_path():
-        yield fixtures_path
+        return fixtures_path
 
     @App.webasset_output()
     def get_output_path():
@@ -217,7 +220,7 @@ def test_webasset_override_filter_through_bundle(tempdir, fixtures_path):
 
     @App.webasset_path()
     def get_path():
-        yield fixtures_path
+        return fixtures_path
 
     @App.webasset_output()
     def get_output_path():
@@ -256,7 +259,7 @@ def test_webasset_mixed_bundles(tempdir, fixtures_path):
 
     @App.webasset_path()
     def get_path():
-        yield fixtures_path
+        return fixtures_path
 
     @App.webasset_output()
     def get_output_path():
@@ -290,7 +293,7 @@ def test_webasset_compiled_bundle(tempdir, fixtures_path):
 
     @App.webasset_path()
     def get_path():
-        yield fixtures_path
+        return fixtures_path
 
     @App.webasset_output()
     def get_output_path():
@@ -328,7 +331,7 @@ def test_webasset_environment(tempdir, fixtures_path):
 
     @App.webasset_path()
     def get_path():
-        yield fixtures_path
+        return fixtures_path
 
     @App.webasset_output()
     def get_output_path():
