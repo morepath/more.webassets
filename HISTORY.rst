@@ -1,6 +1,9 @@
 Changelog
 ---------
 
+0.3.0 (2016-04-08)
+~~~~~~~~~~~~~~~~~~~
+
 - *Breaking Changes* - This release changes everything!
 
   Assets are no longer registerd through special methods on the application.
