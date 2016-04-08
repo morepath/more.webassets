@@ -40,49 +40,69 @@ def test_webasset_path(current_path):
     ]
 
 
-def test_webasset_path_inheritance(current_path):
+def test_webasset_relative(current_path):
+
+    class App(WebassetsApp):
+        pass
+
+    @App.webasset_path()
+    def get_relative_path():
+        return 'fixtures'
+
+    morepath.commit(App)
+
+    assert App().config.webasset_registry.paths == [
+        os.path.join(current_path, 'fixtures')
+    ]
+
+
+def test_webasset_path_inheritance(tempdir, current_path):
+
+    os.mkdir(os.path.join(tempdir, 'A'))
+    os.mkdir(os.path.join(tempdir, 'B'))
+    os.mkdir(os.path.join(tempdir, 'C'))
 
     class A(WebassetsApp):
         pass
 
     @A.webasset_path()
     def get_path_a():
-        return 'A'
+        return os.path.join(tempdir, 'A')
 
     class B(WebassetsApp):
         pass
 
     @B.webasset_path()
     def get_path_b():
-        return 'B'
+        return os.path.join(tempdir, 'B')
 
     class C(B, A):
         pass
 
     @C.webasset_path()
     def get_path_c():
-        return 'C'
+        return os.path.join(tempdir, 'C')
 
     class D(A, B):
         pass
 
     @D.webasset_path()
     def get_path_c_2():
-        return 'C'
+        return os.path.join(tempdir, 'C')
 
     # the order of A and B is defined by the order they are scanned with
     morepath.commit(A, B, C, D)
 
     assert C().config.webasset_registry.paths == [
-        os.path.normpath(os.path.join(current_path, 'C')),
-        os.path.normpath(os.path.join(current_path, 'B')),
-        os.path.normpath(os.path.join(current_path, 'A')),
+        os.path.join(tempdir, 'C'),
+        os.path.join(tempdir, 'B'),
+        os.path.join(tempdir, 'A'),
     ]
 
     assert D().config.webasset_registry.paths == [
-        os.path.normpath(os.path.join(current_path, 'C')),
-        os.path.normpath(os.path.join(current_path, 'B')),
-        os.path.normpath(os.path.join(current_path, 'A')),
+        os.path.join(tempdir, 'C'),
+        os.path.join(tempdir, 'B'),
+        os.path.join(tempdir, 'A'),
     ]
 
 

@@ -1,6 +1,19 @@
 Changelog
 ---------
 
+- *Breaking Changes* - This release changes everything!
+
+  Assets are no longer registerd through special methods on the application.
+  Instead proper Morepath directives are used. This enables better re-use
+  of assets, less verbosity and proper support of inheritance (you can now
+  have applications which define assets and child-applications which use
+  those assets).
+
+  Have a look at the README and at `the comments in the directives file <https://github.com/morepath/more.webassets/blob/master/more/webassets/directives.py>`_, to get an idea about what has changed.
+
+  Don't hesitate to open an issue if you need help migrating your existing
+  setup.
+
 0.2.0 (2016-04-06)
 ~~~~~~~~~~~~~~~~~~~
 
