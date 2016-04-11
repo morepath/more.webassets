@@ -73,7 +73,7 @@ class InjectorTween(object):
     def urls_to_inject(self, request, suffix=None):
         for resource in request.included_assets:
             for url in self.urls_by_resource(resource):
-                filename, filehash = url.split('?')
+                filename = url.split('?')[0]
 
                 if suffix and not filename.endswith(suffix):
                     continue

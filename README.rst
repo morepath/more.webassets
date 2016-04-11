@@ -80,6 +80,14 @@ This will result in the following html (formatted for readability):
 For it to work you need an 'assets/js' folder with a 'jquery.js' file in the
 same folder as your python file where 'MyApp' is defined.
 
+Debug Mode
+----------
+
+To activate `webassets debug mode <http://webassets.readthedocs.org/en/latest/environment.html#webassets.env.Environment.debug>`_
+use the following environment variable::
+
+    MORE_WEBASSETS_DEBUG=1
+
 Documentation
 -------------
 

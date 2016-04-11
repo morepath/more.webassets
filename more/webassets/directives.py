@@ -217,10 +217,15 @@ class WebassetRegistry(object):
     def get_environment(self):
         """ Returns the webassets environment, registering all the bundles. """
 
+        debug = os.environ.get('MORE_WEBASSETS_DEBUG', '').lower().strip() in (
+            'true', '1'
+        )
+
         env = Environment(
             directory=self.output_path,
             load_path=self.paths,
-            url=self.url
+            url=self.url,
+            debug=debug
         )
 
         for asset in self.assets:

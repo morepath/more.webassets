@@ -1,6 +1,9 @@
 Changelog
 ---------
 
+- Adds a debug environment variable used to activate webasset's debug mode.
+  [href]
+
 - Uses a temporary default output directory if none is specified.
   [href]
 
