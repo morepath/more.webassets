@@ -303,7 +303,9 @@ class WebassetPath(Action, PathMixin):
         if os.path.isabs(path):
             return path
         else:
-            return os.path.join(os.path.dirname(self.code_info.path), path)
+            return os.path.abspath(
+                os.path.join(os.path.dirname(self.code_info.path), path)
+            )
 
     def perform(self, obj, webasset_registry):
         path = self.absolute_path(obj())
