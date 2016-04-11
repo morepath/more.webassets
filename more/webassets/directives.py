@@ -1,5 +1,8 @@
+import atexit
 import inspect
 import os.path
+import shutil
+import tempfile
 
 from dectate import Action
 from more.webassets.core import WebassetsApp
@@ -74,8 +77,9 @@ class WebassetRegistry(object):
         #: :class:`Asset` objects keyed by their name
         self.assets = {}
 
-        #: The output path for all bundles
-        self.output_path = None
+        #: The output path for all bundles (a temporary directory by default)
+        self.output_path = temporary_directory = tempfile.mkdtemp()
+        atexit.register(shutil.rmtree, temporary_directory)
 
         #: A cache of created bundles
         self.cached_bundles = {}

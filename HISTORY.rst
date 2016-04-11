@@ -1,6 +1,9 @@
 Changelog
 ---------
 
+- Uses a temporary default output directory if none is specified.
+  [href]
+
 0.3.0 (2016-04-08)
 ~~~~~~~~~~~~~~~~~~~
 
