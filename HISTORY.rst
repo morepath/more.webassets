@@ -1,6 +1,9 @@
 Changelog
 ---------
 
+0.3.2 (2016-04-11)
+~~~~~~~~~~~~~~~~~~~
+
 - Ensures that the webasset_path is always an absolute path.
   [href]
 
