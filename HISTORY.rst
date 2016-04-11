@@ -1,6 +1,9 @@
 Changelog
 ---------
 
+0.3.1 (2016-04-11)
+~~~~~~~~~~~~~~~~~~~
+
 - Adds a debug environment variable used to activate webasset's debug mode.
   [href]
 
