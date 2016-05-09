@@ -28,7 +28,7 @@ setup(
     url='http://github.com/morepath/more.webassets',
     author='Seantis GmbH',
     author_email='info@seantis.ch',
-    license='GPLv2',
+    license='BSD',
     packages=find_packages(exclude=['ez_setup']),
     namespace_packages=name.split('.')[:-1],
     include_package_data=True,
