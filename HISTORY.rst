@@ -1,6 +1,11 @@
 Changelog
 ---------
 
+0.3.3 (unreleased)
+~~~~~~~~~~~~~~~~~~
+
+- Add Python 3.5 and make it the default test environment.
+
 0.3.2 (2016-04-11)
 ~~~~~~~~~~~~~~~~~~~
 
