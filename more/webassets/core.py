@@ -1,7 +1,9 @@
 from more.webassets.tweens import InjectorTween, PublisherTween
 from morepath.request import Request
 from morepath.app import App
+from dectate import directive
 from ordered_set import OrderedSet
+from . import directives
 
 
 class IncludeRequest(Request):
@@ -36,6 +38,18 @@ class WebassetsApp(App):
     """ Defines an app that servers webassets. """
 
     request_class = IncludeRequest
+
+    webasset_path = directive(directives.WebassetPath)
+
+    webasset_output = directive(directives.WebassetOutput)
+
+    webasset_filter = directive(directives.WebassetFilter)
+
+    webasset_mapping = directive(directives.WebassetMapping)
+
+    webasset_url = directive(directives.WebassetUrl)
+
+    webasset = directive(directives.Webasset)
 
 
 @WebassetsApp.tween_factory()

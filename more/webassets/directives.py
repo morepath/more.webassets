@@ -5,7 +5,6 @@ import shutil
 import tempfile
 
 from dectate import Action
-from more.webassets.core import WebassetsApp
 from webassets import Bundle, Environment
 
 
@@ -269,7 +268,6 @@ class PathMixin(object):
             return os.path.join(os.path.dirname(self.code_info.path), path)
 
 
-@WebassetsApp.directive('webasset_path')
 class WebassetPath(Action, PathMixin):
     """ Registers a path with more.webassets.
 
@@ -314,7 +312,6 @@ class WebassetPath(Action, PathMixin):
         webasset_registry.register_path(self.absolute_path(obj()))
 
 
-@WebassetsApp.directive('webasset_output')
 class WebassetOutput(Action, PathMixin):
     """ Sets the output path for all bundles.
 
@@ -335,7 +332,6 @@ class WebassetOutput(Action, PathMixin):
         webasset_registry.output_path = self.absolute_path(obj())
 
 
-@WebassetsApp.directive('webasset_filter')
 class WebassetFilter(Action):
     """ Registers a default filter for an extension.
 
@@ -366,7 +362,6 @@ class WebassetFilter(Action):
         webasset_registry.register_filter(self.name, obj())
 
 
-@WebassetsApp.directive('webasset_mapping')
 class WebassetMapping(Action):
     """ Maps an extension to either css or js.
 
@@ -398,7 +393,6 @@ class WebassetMapping(Action):
         webasset_registry.mapping[self.name] = obj()
 
 
-@WebassetsApp.directive('webasset_url')
 class WebassetUrl(Action):
     """ Defines the url under which the bundles should be served.
 
@@ -421,7 +415,6 @@ class WebassetUrl(Action):
         webasset_registry.url = obj()
 
 
-@WebassetsApp.directive('webasset')
 class Webasset(Action):
     """ Registers an asset which may then be included in the page.
 
