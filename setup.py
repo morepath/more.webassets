@@ -35,7 +35,7 @@ setup(
     zip_safe=False,
     platforms='any',
     install_requires=[
-        'morepath>0.12',
+        'morepath>=0.16',
         'ordered-set',
         'webassets',
         'webob'
