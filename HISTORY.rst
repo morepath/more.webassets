@@ -4,9 +4,6 @@ Changelog
 0.3.3 (2016-10-04)
 ~~~~~~~~~~~~~~~~~~~
 
-0.3.3 (unreleased)
-~~~~~~~~~~~~~~~~~~
-
 - Add Python 3.5 and make it the default test environment.
 
 - Update to work with Morepath 0.16.
