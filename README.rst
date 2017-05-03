@@ -73,8 +73,10 @@ This will result in the following html (formatted for readability):
 
     <html>
         <head></head>
-        <body>hello</body>
-        <script type="text/javascript" src="./assets/jquery.bundle.js?1234"></script>
+        <body>
+            hello
+            <script type="text/javascript" src="./assets/jquery.bundle.js?1234"></script>
+        </body>
     </html>
 
 For it to work you need an 'assets/js' folder with a 'jquery.js' file in the

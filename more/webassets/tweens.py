@@ -104,7 +104,7 @@ class InjectorTween(object):
 
         if scripts:
             response.body = response.body.replace(
-                b'</html>', scripts.encode('utf-8') + b'</html>', 1
+                b'</body>', scripts.encode('utf-8') + b'</body>', 1
             )
 
         if stylesheets:

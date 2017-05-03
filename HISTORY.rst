@@ -1,6 +1,13 @@
 Changelog
 ---------
 
+- Render the script tag inside the body element instead of after it.
+
+  This turns the output into valid HTML. Rendering it outside the body element
+  as it was done before works in practice, but it is technically not
+  valid.
+  [href]
+
 0.3.3 (2016-10-04)
 ~~~~~~~~~~~~~~~~~~~
 

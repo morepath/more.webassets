@@ -150,7 +150,7 @@ def test_inject_webassets(tempdir):
     # md5 hash of the javascript files included
     injected_html = (
         '<script type="text/javascript" '
-        'src="/assets/common.bundle.js?ddc71aa3"></script></html>')
+        'src="/assets/common.bundle.js?ddc71aa3"></script></body>')
 
     assert injected_html in client.get('?bundle=common').text
 
