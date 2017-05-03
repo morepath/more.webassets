@@ -1,6 +1,9 @@
 Changelog
 ---------
 
+0.3.4 (2017-05-03)
+~~~~~~~~~~~~~~~~~~~
+
 - Render the script tag inside the body element instead of after it.
 
   This turns the output into valid HTML. Rendering it outside the body element
