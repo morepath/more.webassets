@@ -127,6 +127,29 @@ def test_webasset_filter():
     assert App().config.webasset_registry.filters == {'js': 'rjsmin'}
 
 
+def test_webasset_filter_chain():
+
+    class App(WebassetsApp):
+        pass
+
+    @App.webasset_filter('foo', produces='bar')
+    def foo_filter():
+        return 'foo'
+
+    @App.webasset_filter('bar')
+    def bar_filter():
+        return 'bar'
+
+    @App.webasset('common')
+    def get_common_assets():
+        yield 'common.foo'
+
+    morepath.commit(App)
+
+    common = App().config.webasset_registry.get_bundles('common')
+    import pdb; pdb.set_trace()
+
+
 def test_webasset_directive(tempdir, fixtures_path):
 
     class App(WebassetsApp):

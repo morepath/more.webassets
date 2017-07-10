@@ -73,6 +73,9 @@ class WebassetRegistry(object):
         #: filter string associated with it. (e.g. {'js': 'rjsmin'})
         self.filters = {}
 
+        #: The extension the filter at self.filters[key] produces
+        self.filter_product = {}
+
         #: :class:`Asset` objects keyed by their name
         self.assets = {}
 
@@ -109,12 +112,13 @@ class WebassetRegistry(object):
         assert os.path.isabs(path), "absolute paths only"
         self.paths.insert(0, os.path.normpath(path))
 
-    def register_filter(self, name, filter):
+    def register_filter(self, name, filter, produces=None):
         """ Registers a filter, overriding any existing filter of the same
         name.
 
         """
         self.filters[name] = filter
+        self.filter_product[name] = produces or name
 
     def register_asset(self, name, assets, filters=None):
         """ Registers a new asset.
@@ -205,13 +209,33 @@ class WebassetRegistry(object):
 
             yield Bundle(
                 *files,
-                filters=filters.get(asset.extension),
+                filters=self.get_asset_filters(asset, filters),
                 output='{}.bundle.{}'.format(name, extension)
             )
         else:
             for sub in (self.assets[a] for a in asset.assets):
                 for bundle in self.get_bundles(sub.name, filters=filters):
                     yield bundle
+
+    def get_asset_filters(self, asset, filters):
+        """ Returns the filters used for the given asset. """
+
+        if not asset.is_pure:
+            return None
+
+        bundle_filters = []
+
+        if filters.get(asset.extension) is not None:
+            bundle_filters.append(filters[asset.extension])
+
+        # include the filters for the resulting file to produce a chain
+        # of filters (for example React JSX -> Javascript -> Minified)
+        product = self.filter_product.get(asset.extension)
+
+        if product and product != asset.extension and product in filters:
+            bundle_filters.append(filters[product])
+
+        return bundle_filters
 
     def get_environment(self):
         """ Returns the webassets environment, registering all the bundles. """
@@ -341,25 +365,31 @@ class WebassetFilter(Action):
         def get_js_filter():
             return 'rjsmin'
 
-        @App.webasset_filter('scss')
+        @App.webasset_filter('scss', produces='css')
         def get_scss_filter():
             return 'pyscss'
 
     For a list of available filters see
     `<http://webassets.readthedocs.org/en/latest/builtin_filters.html>`_.
 
+    The ``produces`` argument indicates that a given filter produces a new
+    extension. This will be used to push the file resulting from the filter
+    into whatever filter is registered for the resulting extension. This can
+    be used to chain filters (i.e. Coffeescript -> Javascript -> Minified).
+
     """
 
     group_class = WebassetPath
 
-    def __init__(self, name):
+    def __init__(self, name, produces=None):
         self.name = name
+        self.produces = produces
 
     def identifier(self, webasset_registry):
         return self.name
 
     def perform(self, obj, webasset_registry):
-        webasset_registry.register_filter(self.name, obj())
+        webasset_registry.register_filter(self.name, obj(), self.produces)
 
 
 class WebassetMapping(Action):
