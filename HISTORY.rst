@@ -1,6 +1,9 @@
 Changelog
 ---------
 
+0.4.0 (2017-07-10)
+~~~~~~~~~~~~~~~~~~~
+
 - Adds the ability chain output filters (i.e. jsx -> jss -> minified).
   [href]
 
