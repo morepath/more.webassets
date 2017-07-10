@@ -127,27 +127,33 @@ def test_webasset_filter():
     assert App().config.webasset_registry.filters == {'js': 'rjsmin'}
 
 
-def test_webasset_filter_chain():
+def test_webasset_filter_chain(fixtures_path):
 
     class App(WebassetsApp):
         pass
 
-    @App.webasset_filter('foo', produces='bar')
-    def foo_filter():
-        return 'foo'
+    @App.webasset_path()
+    def get_path():
+        return fixtures_path
 
-    @App.webasset_filter('bar')
+    @App.webasset_filter('js', produces='css')
+    def foo_filter():
+        return 'jsmin'
+
+    @App.webasset_filter('css')
     def bar_filter():
-        return 'bar'
+        return 'cssmin'
 
     @App.webasset('common')
     def get_common_assets():
-        yield 'common.foo'
+        yield 'jquery.js'
 
     morepath.commit(App)
 
-    common = App().config.webasset_registry.get_bundles('common')
-    import pdb; pdb.set_trace()
+    common = list(App().config.webasset_registry.get_bundles('common'))
+    assert len(common) == 1
+    assert common[0].filters[0].name == 'jsmin'
+    assert common[0].filters[1].name == 'cssmin'
 
 
 def test_webasset_directive(tempdir, fixtures_path):
