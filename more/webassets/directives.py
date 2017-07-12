@@ -194,7 +194,9 @@ class WebassetRegistry(object):
         assert self.output_path, "no webasset_output path set"
 
         asset = self.assets[name]
-        filters = self.merge_filters(self.filters, asset.filters, filters)
+
+        overriding_filters = self.merge_filters(asset.filters, filters)
+        all_filters = self.merge_filters(self.filters, asset.filters, filters)
 
         if asset.is_pure:
 
@@ -209,12 +211,12 @@ class WebassetRegistry(object):
 
             yield Bundle(
                 *files,
-                filters=self.get_asset_filters(asset, filters),
+                filters=self.get_asset_filters(asset, all_filters),
                 output='{}.bundle.{}'.format(name, extension)
             )
         else:
             for sub in (self.assets[a] for a in asset.assets):
-                for bundle in self.get_bundles(sub.name, filters=filters):
+                for bundle in self.get_bundles(sub.name, overriding_filters):
                     yield bundle
 
     def get_asset_filters(self, asset, filters):

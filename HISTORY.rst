@@ -1,6 +1,9 @@
 Changelog
 ---------
 
+- Stops default filters from overriding asset specific filters.
+  [href]
+
 - Adds the ability to define a list of filters (chain) on an asset.
   [href]
 
