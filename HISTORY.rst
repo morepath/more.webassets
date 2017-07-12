@@ -1,6 +1,9 @@
 Changelog
 ---------
 
+- Adds the ability to define a list of filters (chain) on an asset.
+  [href]
+
 0.4.0 (2017-07-10)
 ~~~~~~~~~~~~~~~~~~~
 

@@ -223,17 +223,25 @@ class WebassetRegistry(object):
         if not asset.is_pure:
             return None
 
+        def append_filter(item):
+            str_classes = ("".__class__, b"".__class__, u"".__class__)
+
+            if isinstance(item, str_classes):
+                bundle_filters.append(item)
+            else:
+                bundle_filters.extend(item)
+
         bundle_filters = []
 
         if filters.get(asset.extension) is not None:
-            bundle_filters.append(filters[asset.extension])
+            append_filter(filters[asset.extension])
 
         # include the filters for the resulting file to produce a chain
         # of filters (for example React JSX -> Javascript -> Minified)
         product = self.filter_product.get(asset.extension)
 
         if product and product != asset.extension and product in filters:
-            bundle_filters.append(filters[product])
+            append_filter(filters[product])
 
         return bundle_filters
 
