@@ -133,7 +133,7 @@ class WebassetRegistry(object):
         self.assets[name] = Asset(
             name=name,
             assets=assets,
-            filters=filters or self.filters
+            filters=filters
         )
 
         # and have one additional asset for each file
@@ -147,7 +147,7 @@ class WebassetRegistry(object):
                 self.assets[basename] = Asset(
                     name=basename,
                     assets=(path, ),
-                    filters=filters or self.filters
+                    filters=filters
                 )
             else:
                 assert asset in self.assets, "unknown asset {}".format(asset)

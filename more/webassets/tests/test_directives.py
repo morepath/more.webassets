@@ -329,6 +329,42 @@ def test_global_filter_is_only_a_default(tempdir, fixtures_path):
     assert not bundles[0].filters
 
 
+def test_global_filter_is_only_a_default_with_bundle(tempdir, fixtures_path):
+
+    class App(WebassetsApp):
+        pass
+
+    @App.webasset_path()
+    def get_path():
+        return fixtures_path
+
+    @App.webasset_output()
+    def get_output_path():
+        return tempdir
+
+    @App.webasset('jquery', filters={'js': None})
+    def get_jquery_asset():
+        yield 'jquery.js'
+
+    @App.webasset('common')
+    def get_common_asset():
+        yield 'jquery'
+
+    @App.webasset_filter('js')
+    def get_js_filter():
+        return 'rjsmin'
+
+    morepath.commit(App)
+
+    bundles = list(App().config.webasset_registry.get_bundles('common'))
+    assert len(bundles) == 1
+    assert not bundles[0].filters
+
+    bundles = list(App().config.webasset_registry.get_bundles('jquery'))
+    assert len(bundles) == 1
+    assert not bundles[0].filters
+
+
 def test_webasset_mixed_bundles(tempdir, fixtures_path):
 
     class App(WebassetsApp):
