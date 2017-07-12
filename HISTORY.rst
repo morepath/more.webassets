@@ -1,6 +1,9 @@
 Changelog
 ---------
 
+0.5.0 (2017-07-12)
+~~~~~~~~~~~~~~~~~~~
+
 - Stops default filters from overriding asset specific filters.
   [href]
 
