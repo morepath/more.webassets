@@ -1,6 +1,9 @@
 Changelog
 ---------
 
+0.5.1 (2017-07-12)
+~~~~~~~~~~~~~~~~~~~
+
 - Fixes an additional case default filters overriding asset specific filters.
   [href]
 
