@@ -133,7 +133,7 @@ Coverage
 
 Latests PyPI Release
 --------------------
-.. image:: https://pypip.in/v/more.webassets/badge.png
+.. image:: https://img.shields.io/pypi/v/more.webassets.svg
   :target: https://crate.io/packages/more.webassets
   :alt: Latest PyPI Release
 
