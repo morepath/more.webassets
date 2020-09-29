@@ -45,7 +45,8 @@ setup(
             'coverage',
             'pytest',
             'webtest',
-            'pyscss'
+            'pyscss',
+            'tox'
         ],
     ),
     classifiers=[
