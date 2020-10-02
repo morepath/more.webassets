@@ -1,6 +1,11 @@
 Changelog
 ---------
 
+0.5.2 (unreleased)
+~~~~~~~~~~~~~~~~~~~
+
+- Drop support for Python below 3.6
+
 0.5.1 (2017-07-12)
 ~~~~~~~~~~~~~~~~~~~
 
