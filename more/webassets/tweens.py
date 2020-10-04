@@ -12,24 +12,25 @@ except ImportError:
 
 
 # content types and methods that get handled by the injector/publisher
-CONTENT_TYPES = {'text/html', 'application/xhtml+xml'}
-METHODS = {'GET', 'POST', 'HEAD'}
+CONTENT_TYPES = {"text/html", "application/xhtml+xml"}
+METHODS = {"GET", "POST", "HEAD"}
 
 # arbitrarily define forever as 10 years in the future
 FOREVER = timedelta(days=365 * 10).total_seconds()
 
 
 # what separators does this operating system provide that are not a slash?
-_os_alt_seps = set(sep for sep in [os.path.sep, os.path.altsep]
-                   if sep not in (None, '/'))
+_os_alt_seps = set(
+    sep for sep in [os.path.sep, os.path.altsep] if sep not in (None, "/")
+)
 
 # what elements may not be in a path element?
-_insecure_elements = set(['..', '.', '']) | _os_alt_seps
+_insecure_elements = set(["..", ".", ""]) | _os_alt_seps
 
 
 def is_subpath(directory, path):
     """ Returns true if the given path is inside the given directory. """
-    directory = os.path.join(os.path.realpath(directory), '')
+    directory = os.path.join(os.path.realpath(directory), "")
     path = os.path.realpath(path)
 
     # return true, if the common prefix of both is equal to directory
@@ -38,10 +39,10 @@ def is_subpath(directory, path):
 
 
 def has_insecure_path_element(path):
-    """ Returns true if the given path contains an insecure path element.
+    """Returns true if the given path contains an insecure path element.
     That is '..' or '.' or ''
     """
-    if _insecure_elements.intersection(path.split('/')):
+    if _insecure_elements.intersection(path.split("/")):
         return True
 
     return False
@@ -64,7 +65,7 @@ class InjectorTween(object):
                 self._urls[resource].extend(bundle.urls())
 
                 try:
-                    bundle = self.environment[getattr(bundle, 'next_bundle')]
+                    bundle = self.environment[getattr(bundle, "next_bundle")]
                 except (AttributeError, KeyError):
                     bundle = None
 
@@ -73,12 +74,12 @@ class InjectorTween(object):
     def urls_to_inject(self, request, suffix=None):
         for resource in request.included_assets:
             for url in self.urls_by_resource(resource):
-                filename = url.split('?')[0]
+                filename = url.split("?")[0]
 
                 if suffix and not filename.endswith(suffix):
                     continue
 
-                yield '/' + url
+                yield "/" + url
 
     def __call__(self, request):
         response = self.handler(request)
@@ -92,31 +93,31 @@ class InjectorTween(object):
         if response.content_type.lower() not in CONTENT_TYPES:
             return response
 
-        scripts = '\n'.join(
+        scripts = "\n".join(
             '<script type="text/javascript" src="{}"></script>'.format(url)
-            for url in self.urls_to_inject(request, '.js')
+            for url in self.urls_to_inject(request, ".js")
         )
 
-        stylesheets = '\n'.join(
+        stylesheets = "\n".join(
             '<link rel="stylesheet" type="text/css" href="{}">'.format(url)
-            for url in self.urls_to_inject(request, '.css')
+            for url in self.urls_to_inject(request, ".css")
         )
 
         if scripts:
             response.body = response.body.replace(
-                b'</body>', scripts.encode('utf-8') + b'</body>', 1
+                b"</body>", scripts.encode("utf-8") + b"</body>", 1
             )
 
         if stylesheets:
             response.body = response.body.replace(
-                b'</head>', stylesheets.encode('utf-8') + b'</head>', 1
+                b"</head>", stylesheets.encode("utf-8") + b"</head>", 1
             )
 
         return response
 
 
 class PublisherTween(object):
-    """ Returns the webassets if the request begins with the
+    """Returns the webassets if the request begins with the
     :attr:`WebassetsApp.webassets_url`.
 
     """
@@ -131,7 +132,7 @@ class PublisherTween(object):
         if publisher_signature != self.environment.url:
             return self.handler(request)
 
-        subpath = request.path_info.replace(publisher_signature, '').strip('/')
+        subpath = request.path_info.replace(publisher_signature, "").strip("/")
         subpath = unquote(subpath)
 
         if has_insecure_path_element(subpath):

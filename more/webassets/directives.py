@@ -9,12 +9,12 @@ from webassets import Bundle, Environment
 
 
 class Asset(object):
-    """ Represents a registered asset which points to one or more files or
+    """Represents a registered asset which points to one or more files or
     child-assets.
 
     """
 
-    __slots__ = ('name', 'assets', 'filters')
+    __slots__ = ("name", "assets", "filters")
 
     def __init__(self, name, assets, filters):
         self.name = name
@@ -22,13 +22,15 @@ class Asset(object):
         self.filters = filters
 
     def __eq__(self, other):
-        return self.name == self.name \
-            and self.assets == self.assets \
+        return (
+            self.name == self.name
+            and self.assets == self.assets
             and self.filters == self.filters
+        )
 
     @property
     def is_pure(self):
-        """ Returns True if this asset is "pure".
+        """Returns True if this asset is "pure".
 
         Pure assets are assets which consist of a single file or a set of
         files which share one common extension.
@@ -38,15 +40,15 @@ class Asset(object):
         if self.is_single_file:
             return True
 
-        extensions = {a.split('.')[-1] for a in self.assets}
-        extensions |= {None for a in self.assets if '.' not in a}
+        extensions = {a.split(".")[-1] for a in self.assets}
+        extensions |= {None for a in self.assets if "." not in a}
 
         return len(extensions) == 1 and None not in extensions
 
     @property
     def is_single_file(self):
         """ Returns True if this repesents a single file asset. """
-        return len(self.assets) == 1 and '.' in self.assets[0]
+        return len(self.assets) == 1 and "." in self.assets[0]
 
     @property
     def path(self):
@@ -58,7 +60,7 @@ class Asset(object):
     def extension(self):
         """ Returns the extension of this asset if it's a pure asset. """
         if self.is_pure:
-            return self.assets[0].split('.')[-1]
+            return self.assets[0].split(".")[-1]
 
 
 class WebassetRegistry(object):
@@ -87,23 +89,23 @@ class WebassetRegistry(object):
         self.cached_bundles = {}
 
         #: The url passed to the webasset environment
-        self.url = 'assets'
+        self.url = "assets"
 
         #: more.webasset only publishes js/css files - other file extensions
         #: need to be compiled into either and mapped accordingly
         self.mapping = {
-            'coffee': 'js',
-            'dust': 'js',
-            'jst': 'js',
-            'jsx': 'js',
-            'less': 'css',
-            'sass': 'css',
-            'scss': 'css',
-            'ts': 'js',
+            "coffee": "js",
+            "dust": "js",
+            "jst": "js",
+            "jsx": "js",
+            "less": "css",
+            "sass": "css",
+            "scss": "css",
+            "ts": "js",
         }
 
     def register_path(self, path):
-        """ Registers the given path as a path to be searched for files.
+        """Registers the given path as a path to be searched for files.
 
         The paths are prepended, so each new path has higher precedence than
         all the already registered paths.
@@ -113,7 +115,7 @@ class WebassetRegistry(object):
         self.paths.insert(0, os.path.normpath(path))
 
     def register_filter(self, name, filter, produces=None):
-        """ Registers a filter, overriding any existing filter of the same
+        """Registers a filter, overriding any existing filter of the same
         name.
 
         """
@@ -121,33 +123,25 @@ class WebassetRegistry(object):
         self.filter_product[name] = produces or name
 
     def register_asset(self, name, assets, filters=None):
-        """ Registers a new asset.
+        """Registers a new asset."""
 
-        """
-
-        assert '.' not in name, "asset names may not contain dots ({})".format(
+        assert "." not in name, "asset names may not contain dots ({})".format(
             name
         )
 
         # keep track of asset bundles
-        self.assets[name] = Asset(
-            name=name,
-            assets=assets,
-            filters=filters
-        )
+        self.assets[name] = Asset(name=name, assets=assets, filters=filters)
 
         # and have one additional asset for each file
         for asset in assets:
             basename = os.path.basename(asset)
 
             # files are entries with an extension
-            if '.' in basename:
+            if "." in basename:
                 path = os.path.normpath(self.find_file(asset))
 
                 self.assets[basename] = Asset(
-                    name=basename,
-                    assets=(path, ),
-                    filters=filters
+                    name=basename, assets=(path,), filters=filters
                 )
             else:
                 assert asset in self.assets, "unknown asset {}".format(asset)
@@ -174,7 +168,7 @@ class WebassetRegistry(object):
         raise LookupError("Could not find {} in paths".format(name))
 
     def merge_filters(self, *filters):
-        """ Takes a list of filters and merges them.
+        """Takes a list of filters and merges them.
 
         The last filter has the highest precedence.
 
@@ -201,18 +195,17 @@ class WebassetRegistry(object):
         if asset.is_pure:
 
             if asset.is_single_file:
-                files = (asset.path, )
+                files = (asset.path,)
             else:
-                files = (
-                    a.path for a in (self.assets[a] for a in asset.assets))
+                files = (a.path for a in (self.assets[a] for a in asset.assets))
 
             extension = self.mapping.get(asset.extension, asset.extension)
-            assert extension in ('js', 'css')
+            assert extension in ("js", "css")
 
             yield Bundle(
                 *files,
                 filters=self.get_asset_filters(asset, all_filters),
-                output='{}.bundle.{}'.format(name, extension)
+                output="{}.bundle.{}".format(name, extension),
             )
         else:
             for sub in (self.assets[a] for a in asset.assets):
@@ -226,7 +219,7 @@ class WebassetRegistry(object):
             return None
 
         def append_filter(item):
-            str_classes = ("".__class__, b"".__class__, u"".__class__)
+            str_classes = ("".__class__, b"".__class__, "".__class__)
 
             if isinstance(item, str_classes):
                 bundle_filters.append(item)
@@ -250,41 +243,46 @@ class WebassetRegistry(object):
     def get_environment(self):
         """ Returns the webassets environment, registering all the bundles. """
 
-        debug = os.environ.get('MORE_WEBASSETS_DEBUG', '').lower().strip() in (
-            'true', '1'
+        debug = os.environ.get("MORE_WEBASSETS_DEBUG", "").lower().strip() in (
+            "true",
+            "1",
         )
 
         env = Environment(
             directory=self.output_path,
             load_path=self.paths,
             url=self.url,
-            debug=debug
+            debug=debug,
         )
 
         for asset in self.assets:
             bundles = tuple(self.get_bundles(asset))
 
-            js = tuple(b for b in bundles if b.output.endswith('.js'))
-            css = tuple(b for b in bundles if b.output.endswith('.css'))
+            js = tuple(b for b in bundles if b.output.endswith(".js"))
+            css = tuple(b for b in bundles if b.output.endswith(".css"))
 
             if js:
-                js_bundle = len(js) == 1 and js[0] or Bundle(
-                    *js, output='{}.bundle.js'.format(asset)
+                js_bundle = (
+                    len(js) == 1
+                    and js[0]
+                    or Bundle(*js, output="{}.bundle.js".format(asset))
                 )
             else:
                 js_bundle = None
 
             if css:
-                css_bundle = len(css) == 1 and css[0] or Bundle(
-                    *css, output='{}.bundle.css'.format(asset)
+                css_bundle = (
+                    len(css) == 1
+                    and css[0]
+                    or Bundle(*css, output="{}.bundle.css".format(asset))
                 )
             else:
                 css_bundle = None
 
             if js_bundle and css_bundle:
-                js_bundle.next_bundle = asset + '_1'
+                js_bundle.next_bundle = asset + "_1"
                 env.register(asset, js_bundle)
-                env.register(asset + '_1', css_bundle)
+                env.register(asset + "_1", css_bundle)
             elif js_bundle:
                 env.register(asset, js_bundle)
             else:
@@ -294,7 +292,6 @@ class WebassetRegistry(object):
 
 
 class PathMixin(object):
-
     def absolute_path(self, path):
         if os.path.isabs(path):
             return path
@@ -303,7 +300,7 @@ class PathMixin(object):
 
 
 class WebassetPath(Action, PathMixin):
-    """ Registers a path with more.webassets.
+    """Registers a path with more.webassets.
 
     Registered paths are searched for assets registered::
 
@@ -324,9 +321,7 @@ class WebassetPath(Action, PathMixin):
 
     """
 
-    config = {
-        'webasset_registry': WebassetRegistry
-    }
+    config = {"webasset_registry": WebassetRegistry}
 
     def identifier(self, webasset_registry):
         return object()
@@ -347,7 +342,7 @@ class WebassetPath(Action, PathMixin):
 
 
 class WebassetOutput(Action, PathMixin):
-    """ Sets the output path for all bundles.
+    """Sets the output path for all bundles.
 
     For example::
 
@@ -367,7 +362,7 @@ class WebassetOutput(Action, PathMixin):
 
 
 class WebassetFilter(Action):
-    """ Registers a default filter for an extension.
+    """Registers a default filter for an extension.
 
     Filters are strings interpreted by `webasset`::
 
@@ -403,7 +398,7 @@ class WebassetFilter(Action):
 
 
 class WebassetMapping(Action):
-    """ Maps an extension to either css or js.
+    """Maps an extension to either css or js.
 
     You usually don't have to use this, as more.webassets comes with default
     values. If you do, please open an issue so your mapping may be added
@@ -434,7 +429,7 @@ class WebassetMapping(Action):
 
 
 class WebassetUrl(Action):
-    """ Defines the url under which the bundles should be served.
+    """Defines the url under which the bundles should be served.
 
     Passed to the webasset environment, this is basically a url path prefix::
 
@@ -456,7 +451,7 @@ class WebassetUrl(Action):
 
 
 class Webasset(Action):
-    """ Registers an asset which may then be included in the page.
+    """Registers an asset which may then be included in the page.
 
     For example::
 
@@ -509,7 +504,7 @@ class Webasset(Action):
         WebassetMapping,
         WebassetOutput,
         WebassetPath,
-        WebassetUrl
+        WebassetUrl,
     ]
     group_class = WebassetPath
 
