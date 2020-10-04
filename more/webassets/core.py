@@ -7,7 +7,7 @@ from . import directives
 
 
 class IncludeRequest(Request):
-    """ Adds the ability to include webassets bundles on the request.
+    """Adds the ability to include webassets bundles on the request.
 
     If the bundle does not exist, a KeyError will be raised during the
     rendering of the response, after the view has returned.
@@ -54,7 +54,7 @@ class WebassetsApp(App):
 
 @WebassetsApp.tween_factory()
 def webassets_injector_tween(app, handler):
-    """ Wraps the response with the injector and the publisher tween.
+    """Wraps the response with the injector and the publisher tween.
 
     See :class:`webassets.tweens.InjectorTween` and
     :class:`webassets.tweens.PublisherTween`.

@@ -18,4 +18,4 @@ def current_path():
 
 @pytest.fixture
 def fixtures_path(current_path):
-    return os.path.join(current_path, 'fixtures')
+    return os.path.join(current_path, "fixtures")
