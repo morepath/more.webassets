@@ -42,12 +42,13 @@ setup(
     ],
     extras_require=dict(
         test=[
-            'coverage',
-            'pytest',
-            'webtest',
-            'pyscss',
-            'tox'
+            "pytest >= 2.9.0",
+            "WebTest >= 2.0.14",
+            "pytest-remove-stale-bytecode",
+            "pyscss"
         ],
+        pep8=["flake8", "black"],
+        coverage=["pytest-cov"],
     ),
     classifiers=[
         'Intended Audience :: Developers',
