@@ -120,8 +120,8 @@ More Webassets uses `Semantic Versioning <http://semver.org/>`_
 Build Status
 ------------
 
-.. image:: https://travis-ci.org/morepath/more.webassets.png
-  :target: https://travis-ci.org/morepath/more.webassets
+.. image:: https://travis-ci.com/morepath/more.webassets.png
+  :target: https://travis-ci.com/morepath/more.webassets
   :alt: Build Status
 
 Coverage
