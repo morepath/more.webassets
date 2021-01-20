@@ -1,3 +1,17 @@
+.. image:: https://github.com/morepath/more.webassets/workflows/CI/badge.svg?branch=master
+   :target: https://github.com/morepath/more.webassets/actions?workflow=CI
+   :alt: CI Status
+
+.. image:: https://coveralls.io/repos/github/morepath/more.webassets/badge.svg?branch=master
+    :target: https://coveralls.io/github/morepath/more.webassets?branch=master
+
+.. image:: https://img.shields.io/pypi/v/more.webassets.svg
+  :target: https://pypi.org/project/more.webassets/
+
+.. image:: https://img.shields.io/pypi/pyversions/more.webassets.svg
+  :target: https://pypi.org/project/more.webassets/
+
+
 More Webassets
 ==============
 
@@ -116,26 +130,6 @@ More Webassets follows PEP8 as close as possible. To test for it run::
     tox -e pep8
 
 More Webassets uses `Semantic Versioning <http://semver.org/>`_
-
-Build Status
-------------
-
-.. image:: https://travis-ci.com/morepath/more.webassets.png
-  :target: https://travis-ci.com/morepath/more.webassets
-  :alt: Build Status
-
-Coverage
---------
-
-.. image:: https://coveralls.io/repos/morepath/more.webassets/badge.png?branch=master
-  :target: https://coveralls.io/r/morepath/more.webassets?branch=master
-  :alt: Project Coverage
-
-Latests PyPI Release
---------------------
-.. image:: https://img.shields.io/pypi/v/more.webassets.svg
-  :target: https://crate.io/packages/more.webassets
-  :alt: Latest PyPI Release
 
 License
 -------

@@ -209,9 +209,7 @@ def test_webasset_directive(tempdir, fixtures_path):
 
     assert len(underscore) == 1
     assert underscore[0].output.endswith("underscore.js.bundle.js")
-    assert underscore[0].contents == (
-        os.path.join(fixtures_path, "underscore.js"),
-    )
+    assert underscore[0].contents == (os.path.join(fixtures_path, "underscore.js"),)
 
 
 def test_webasset_override_filters(tempdir, fixtures_path):
@@ -450,12 +448,12 @@ def test_webasset_environment(tempdir, fixtures_path):
     e = App().config.webasset_registry.get_environment()
 
     for asset in ("jquery.js", "underscore.js"):
-        assert e[asset].output.endswith("{}.bundle.js".format(asset))
+        assert e[asset].output.endswith(f"{asset}.bundle.js")
         assert e[asset].contents == (os.path.join(fixtures_path, asset),)
         assert len(e[asset].urls()) == 1
 
     for asset in ("main.scss", "extra.css"):
-        assert e[asset].output.endswith("{}.bundle.css".format(asset))
+        assert e[asset].output.endswith(f"{asset}.bundle.css")
         assert e[asset].contents == (os.path.join(fixtures_path, asset),)
         assert len(e[asset].urls()) == 1
 
@@ -470,14 +468,10 @@ def test_webasset_environment(tempdir, fixtures_path):
     assert e["css"].output.endswith("css.bundle.css")
     assert len(e["css"].contents) == 2
     assert e["css"].contents[0].output.endswith("main.scss.bundle.css")
-    assert e["css"].contents[0].contents == (
-        os.path.join(fixtures_path, "main.scss"),
-    )
+    assert e["css"].contents[0].contents == (os.path.join(fixtures_path, "main.scss"),)
 
     assert e["css"].contents[1].output.endswith("extra.css.bundle.css")
-    assert e["css"].contents[1].contents == (
-        os.path.join(fixtures_path, "extra.css"),
-    )
+    assert e["css"].contents[1].contents == (os.path.join(fixtures_path, "extra.css"),)
 
     assert len(e["css"].urls()) == 1
 

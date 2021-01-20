@@ -6,6 +6,8 @@ Changelog
 
 - Drop support for Python below 3.6
 
+- Use GitHub Actions for CI.
+
 0.5.1 (2017-07-12)
 ~~~~~~~~~~~~~~~~~~~
 

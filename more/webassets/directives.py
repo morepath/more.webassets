@@ -8,7 +8,7 @@ from dectate import Action
 from webassets import Bundle, Environment
 
 
-class Asset(object):
+class Asset:
     """Represents a registered asset which points to one or more files or
     child-assets.
 
@@ -63,7 +63,7 @@ class Asset(object):
             return self.assets[0].split(".")[-1]
 
 
-class WebassetRegistry(object):
+class WebassetRegistry:
     """ A registry managing webasset bundles registered through directives. """
 
     def __init__(self):
@@ -125,9 +125,7 @@ class WebassetRegistry(object):
     def register_asset(self, name, assets, filters=None):
         """Registers a new asset."""
 
-        assert "." not in name, "asset names may not contain dots ({})".format(
-            name
-        )
+        assert "." not in name, f"asset names may not contain dots ({name})"
 
         # keep track of asset bundles
         self.assets[name] = Asset(name=name, assets=assets, filters=filters)
@@ -144,7 +142,7 @@ class WebassetRegistry(object):
                     name=basename, assets=(path,), filters=filters
                 )
             else:
-                assert asset in self.assets, "unknown asset {}".format(asset)
+                assert asset in self.assets, f"unknown asset {asset}"
 
     def find_file(self, name):
         """ Searches for the given file by name using the current paths. """
@@ -165,7 +163,7 @@ class WebassetRegistry(object):
 
             searched.add(path)
 
-        raise LookupError("Could not find {} in paths".format(name))
+        raise LookupError(f"Could not find {name} in paths")
 
     def merge_filters(self, *filters):
         """Takes a list of filters and merges them.
@@ -184,7 +182,7 @@ class WebassetRegistry(object):
     def get_bundles(self, name, filters=None):
         """ Yields all the bundles for the given name (an asset). """
 
-        assert name in self.assets, "unknown asset {}".format(name)
+        assert name in self.assets, f"unknown asset {name}"
         assert self.output_path, "no webasset_output path set"
 
         asset = self.assets[name]
@@ -205,12 +203,11 @@ class WebassetRegistry(object):
             yield Bundle(
                 *files,
                 filters=self.get_asset_filters(asset, all_filters),
-                output="{}.bundle.{}".format(name, extension),
+                output=f"{name}.bundle.{extension}",
             )
         else:
             for sub in (self.assets[a] for a in asset.assets):
-                for bundle in self.get_bundles(sub.name, overriding_filters):
-                    yield bundle
+                yield from self.get_bundles(sub.name, overriding_filters)
 
     def get_asset_filters(self, asset, filters):
         """ Returns the filters used for the given asset. """
@@ -263,9 +260,7 @@ class WebassetRegistry(object):
 
             if js:
                 js_bundle = (
-                    len(js) == 1
-                    and js[0]
-                    or Bundle(*js, output="{}.bundle.js".format(asset))
+                    len(js) == 1 and js[0] or Bundle(*js, output=f"{asset}.bundle.js")
                 )
             else:
                 js_bundle = None
@@ -274,7 +269,7 @@ class WebassetRegistry(object):
                 css_bundle = (
                     len(css) == 1
                     and css[0]
-                    or Bundle(*css, output="{}.bundle.css".format(asset))
+                    or Bundle(*css, output=f"{asset}.bundle.css")
                 )
             else:
                 css_bundle = None
@@ -291,7 +286,7 @@ class WebassetRegistry(object):
         return env
 
 
-class PathMixin(object):
+class PathMixin:
     def absolute_path(self, path):
         if os.path.isabs(path):
             return path
@@ -336,7 +331,7 @@ class WebassetPath(Action, PathMixin):
 
     def perform(self, obj, webasset_registry):
         path = self.absolute_path(obj())
-        assert os.path.isdir(path), "'{}' does not exist".format(path)
+        assert os.path.isdir(path), f"'{path}' does not exist"
 
         webasset_registry.register_path(self.absolute_path(obj()))
 

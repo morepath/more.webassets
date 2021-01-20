@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from setuptools import setup, find_packages
 
 name = "more.webassets"
@@ -8,10 +6,8 @@ version = "0.5.1"
 
 
 def get_long_description():
-    import io
-
-    readme = io.open("README.rst", encoding="utf-8").read()
-    history = io.open("HISTORY.rst", encoding="utf-8").read()
+    readme = open("README.rst", encoding="utf-8").read()
+    history = open("HISTORY.rst", encoding="utf-8").read()
 
     # cut the part before the description to avoid repetition on pypi
     readme = readme[readme.index(description) + len(description) :]
@@ -41,7 +37,6 @@ setup(
             "pytest-remove-stale-bytecode",
             "pyscss",
         ],
-        pep8=["flake8", "black"],
         coverage=["pytest-cov"],
     ),
     classifiers=[
@@ -50,6 +45,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Topic :: Software Development :: Libraries :: Python Modules",
         "License :: OSI Approved :: BSD License",
     ],

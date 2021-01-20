@@ -114,7 +114,7 @@ def spawn_test_app(tempdir):
         yield "main.scss"
 
     @App.path("")
-    class Root(object):
+    class Root:
         pass
 
     @App.html(model=Root)
