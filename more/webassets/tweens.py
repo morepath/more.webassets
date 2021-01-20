@@ -20,12 +20,10 @@ FOREVER = timedelta(days=365 * 10).total_seconds()
 
 
 # what separators does this operating system provide that are not a slash?
-_os_alt_seps = set(
-    sep for sep in [os.path.sep, os.path.altsep] if sep not in (None, "/")
-)
+_os_alt_seps = {sep for sep in [os.path.sep, os.path.altsep] if sep not in (None, "/")}
 
 # what elements may not be in a path element?
-_insecure_elements = set(["..", ".", ""]) | _os_alt_seps
+_insecure_elements = {"..", ".", ""} | _os_alt_seps
 
 
 def is_subpath(directory, path):
@@ -48,7 +46,7 @@ def has_insecure_path_element(path):
     return False
 
 
-class InjectorTween(object):
+class InjectorTween:
     """ Injects the webasset urls into the response. """
 
     def __init__(self, environment, handler):
@@ -94,12 +92,12 @@ class InjectorTween(object):
             return response
 
         scripts = "\n".join(
-            '<script type="text/javascript" src="{}"></script>'.format(url)
+            f'<script type="text/javascript" src="{url}"></script>'
             for url in self.urls_to_inject(request, ".js")
         )
 
         stylesheets = "\n".join(
-            '<link rel="stylesheet" type="text/css" href="{}">'.format(url)
+            f'<link rel="stylesheet" type="text/css" href="{url}">'
             for url in self.urls_to_inject(request, ".css")
         )
 
@@ -116,7 +114,7 @@ class InjectorTween(object):
         return response
 
 
-class PublisherTween(object):
+class PublisherTween:
     """Returns the webassets if the request begins with the
     :attr:`WebassetsApp.webassets_url`.
 

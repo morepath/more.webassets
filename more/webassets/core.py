@@ -27,7 +27,7 @@ class IncludeRequest(Request):
     """
 
     def __init__(self, *args, **kwargs):
-        super(IncludeRequest, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.included_assets = OrderedSet()
 
     def include(self, resource):
