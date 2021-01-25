@@ -4,7 +4,7 @@ import tempfile
 import shutil
 
 
-@pytest.yield_fixture
+@pytest.fixture
 def tempdir():
     directory = tempfile.mkdtemp()
     yield directory
