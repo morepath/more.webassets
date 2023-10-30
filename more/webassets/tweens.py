@@ -27,7 +27,7 @@ _insecure_elements = {"..", ".", ""} | _os_alt_seps
 
 
 def is_subpath(directory, path):
-    """ Returns true if the given path is inside the given directory. """
+    """Returns true if the given path is inside the given directory."""
     directory = os.path.join(os.path.realpath(directory), "")
     path = os.path.realpath(path)
 
@@ -47,7 +47,7 @@ def has_insecure_path_element(path):
 
 
 class InjectorTween:
-    """ Injects the webasset urls into the response. """
+    """Injects the webasset urls into the response."""
 
     def __init__(self, environment, handler):
         self.environment = environment

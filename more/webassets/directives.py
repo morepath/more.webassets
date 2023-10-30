@@ -47,27 +47,26 @@ class Asset:
 
     @property
     def is_single_file(self):
-        """ Returns True if this repesents a single file asset. """
+        """Returns True if this repesents a single file asset."""
         return len(self.assets) == 1 and "." in self.assets[0]
 
     @property
     def path(self):
-        """ Returns the path to the single file asset if possible. """
+        """Returns the path to the single file asset if possible."""
         assert self.is_single_file
         return self.assets[0]
 
     @property
     def extension(self):
-        """ Returns the extension of this asset if it's a pure asset. """
+        """Returns the extension of this asset if it's a pure asset."""
         if self.is_pure:
             return self.assets[0].split(".")[-1]
 
 
 class WebassetRegistry:
-    """ A registry managing webasset bundles registered through directives. """
+    """A registry managing webasset bundles registered through directives."""
 
     def __init__(self):
-
         #: A list of all paths which should be searched for files (in order)
         self.paths = []
 
@@ -145,7 +144,7 @@ class WebassetRegistry:
                 assert asset in self.assets, f"unknown asset {asset}"
 
     def find_file(self, name):
-        """ Searches for the given file by name using the current paths. """
+        """Searches for the given file by name using the current paths."""
 
         if os.path.isabs(name):
             return name
@@ -180,7 +179,7 @@ class WebassetRegistry:
         return result
 
     def get_bundles(self, name, filters=None):
-        """ Yields all the bundles for the given name (an asset). """
+        """Yields all the bundles for the given name (an asset)."""
 
         assert name in self.assets, f"unknown asset {name}"
         assert self.output_path, "no webasset_output path set"
@@ -191,7 +190,6 @@ class WebassetRegistry:
         all_filters = self.merge_filters(self.filters, asset.filters, filters)
 
         if asset.is_pure:
-
             if asset.is_single_file:
                 files = (asset.path,)
             else:
@@ -210,7 +208,7 @@ class WebassetRegistry:
                 yield from self.get_bundles(sub.name, overriding_filters)
 
     def get_asset_filters(self, asset, filters):
-        """ Returns the filters used for the given asset. """
+        """Returns the filters used for the given asset."""
 
         if not asset.is_pure:
             return None
@@ -238,7 +236,7 @@ class WebassetRegistry:
         return bundle_filters
 
     def get_environment(self):
-        """ Returns the webassets environment, registering all the bundles. """
+        """Returns the webassets environment, registering all the bundles."""
 
         debug = os.environ.get("MORE_WEBASSETS_DEBUG", "").lower().strip() in (
             "true",
