@@ -8,6 +8,9 @@ Changelog
 
 - Use GitHub Actions for CI.
 
+- Ensure assets are also included in error views. #13 by Cyrill Küttel
+
+
 0.5.1 (2017-07-12)
 ~~~~~~~~~~~~~~~~~~~
 
