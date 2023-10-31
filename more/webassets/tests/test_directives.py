@@ -6,7 +6,6 @@ from more.webassets.directives import Asset
 
 
 def test_webasset_path(current_path):
-
     current_path = os.path.dirname(os.path.realpath(__file__))
 
     class App(WebassetsApp):
@@ -56,7 +55,6 @@ def test_webasset_relative(current_path):
 
 
 def test_webasset_path_inheritance(tempdir, current_path):
-
     os.mkdir(os.path.join(tempdir, "A"))
     os.mkdir(os.path.join(tempdir, "B"))
     os.mkdir(os.path.join(tempdir, "C"))

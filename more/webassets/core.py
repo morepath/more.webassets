@@ -35,7 +35,7 @@ class IncludeRequest(Request):
 
 
 class WebassetsApp(App):
-    """ Defines an app that servers webassets. """
+    """Defines an app that servers webassets."""
 
     request_class = IncludeRequest
 
