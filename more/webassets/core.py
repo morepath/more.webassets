@@ -3,6 +3,7 @@ from morepath.request import Request
 from morepath.app import App
 from dectate import directive
 from ordered_set import OrderedSet
+from morepath.error import excview_tween_factory
 from . import directives
 
 
