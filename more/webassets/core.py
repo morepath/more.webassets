@@ -52,7 +52,7 @@ class WebassetsApp(App):
     webasset = directive(directives.Webasset)
 
 
-@WebassetsApp.tween_factory()
+@WebassetsApp.tween_factory(over=excview_tween_factory)
 def webassets_injector_tween(app, handler):
     """Wraps the response with the injector and the publisher tween.
 
