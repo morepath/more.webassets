@@ -17,12 +17,12 @@ More Webassets
 
 An opinionated Webassets integration for Morepath.
 
-`Webassets <https://webassets.readthedocs.org/en/latest/>`_ |
-`Morepath <http://morepath.readthedocs.org/en/latest/>`_
+`Webassets <https://webassets.readthedocs.io/en/latest/>`_ |
+`Morepath <https://morepath.readthedocs.io/en/latest/>`_
 
 This package is somewhat similar to
 `more.static <https://github.com/morepath/more.static>`_, which integrates
-`bowerstatic <https://bowerstatic.readthedocs.org/en/latest/>`_ into Morepath.
+`bowerstatic <https://bowerstatic.readthedocs.io/en/latest/>`_ into Morepath.
 It is currently not really used anywhere, so you should probably stick to
 `more.static <https://github.com/morepath/more.static>`_.
 
@@ -99,7 +99,7 @@ same folder as your python file where 'MyApp' is defined.
 Debug Mode
 ----------
 
-To activate `webassets debug mode <http://webassets.readthedocs.org/en/latest/environment.html#webassets.env.Environment.debug>`_
+To activate `webassets debug mode <https://webassets.readthedocs.io/en/latest/environment.html#webassets.env.Environment.debug>`_
 use the following environment variable::
 
     MORE_WEBASSETS_DEBUG=1
@@ -129,7 +129,7 @@ More Webassets follows PEP8 as close as possible. To test for it run::
 
     tox -e lint
 
-More Webassets uses `Semantic Versioning <http://semver.org/>`_
+More Webassets uses `Semantic Versioning <https://semver.org/>`_
 
 License
 -------

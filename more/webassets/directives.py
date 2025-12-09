@@ -415,7 +415,7 @@ class WebassetFilter(Action):
             return 'pyscss'
 
     For a list of available filters see
-    `<http://webassets.readthedocs.org/en/latest/builtin_filters.html>`_.
+    `<https://webassets.readthedocs.io/en/latest/builtin_filters.html>`_.
 
     The ``produces`` argument indicates that a given filter produces a new
     extension. This will be used to push the file resulting from the filter
