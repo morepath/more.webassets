@@ -391,7 +391,7 @@ def test_webasset_compiled_bundle(tempdir, fixtures_path):
 
     @App.webasset_filter("scss")
     def get_scss_filter():
-        return "pyscss"
+        return "libsass"
 
     @App.webasset("theme")
     def get_jquery_asset():
@@ -424,7 +424,7 @@ def test_webasset_environment(tempdir, fixtures_path):
 
     @App.webasset_filter("scss")
     def get_scss_filter():
-        return "pyscss"
+        return "libsass"
 
     @App.webasset("js")
     def get_js_asset():

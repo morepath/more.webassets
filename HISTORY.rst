@@ -4,7 +4,9 @@ Changelog
 0.5.2 (unreleased)
 ~~~~~~~~~~~~~~~~~~~
 
-- Drop support for Python below 3.6
+- Switch to PEP-420 namespace package
+
+- Drop support for Python below 3.10
 
 - Use GitHub Actions for CI.
 

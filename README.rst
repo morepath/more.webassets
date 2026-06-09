@@ -13,7 +13,7 @@
 
 
 More Webassets
-==============
+**************
 
 An opinionated Webassets integration for Morepath.
 
@@ -120,14 +120,14 @@ Install tox and run it::
 
 Limit the tests to a specific python version::
 
-    tox -e py27
+    tox -e py311
 
 Conventions
 -----------
 
 More Webassets follows PEP8 as close as possible. To test for it run::
 
-    tox -e pep8
+    tox -e lint
 
 More Webassets uses `Semantic Versioning <http://semver.org/>`_
 

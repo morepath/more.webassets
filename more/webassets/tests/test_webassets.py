@@ -17,47 +17,37 @@ def prepare_fixtures(directory):
     # if those javascripts are changed, the tests below need to be updated
     # with the correct md5 hashes
     with open(os.path.join(directory, "common", "jquery.js"), "w") as f:
-        f.write(
-            """
+        f.write("""
             /* fake jquery */
             var $ = function(){};
-        """
-        )
+        """)
 
     with open(os.path.join(directory, "common", "underscore.js"), "w") as f:
-        f.write(
-            """
+        f.write("""
             /* fake underscore */
             var _ = function(){};
-        """
-        )
+        """)
 
     with open(os.path.join(directory, "theme", "main.scss"), "w") as f:
-        f.write(
-            """
+        f.write("""
             body {
                 a {
                     color: blue;
                 }
             }
-        """
-        )
+        """)
 
     with open(os.path.join(directory, "theme", "other.css"), "w") as f:
-        f.write(
-            """
+        f.write("""
             h1 {
                 font-size: 2rem;
             }
-        """
-        )
+        """)
 
     with open(os.path.join(directory, "common", "extra.js"), "w") as f:
-        f.write(
-            """
+        f.write("""
             $(document).ready(function(){});
-        """
-        )
+        """)
 
 
 def spawn_test_app(tempdir):
@@ -98,7 +88,7 @@ def spawn_test_app(tempdir):
 
     @App.webasset_filter("scss")
     def get_scss_filter():
-        return "pyscss"
+        return "libsass"
 
     @App.webasset(name="common")
     def get_common_assets():
