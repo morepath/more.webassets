@@ -1,11 +1,23 @@
+from __future__ import annotations
+
 import atexit
 import inspect
 import os.path
 import shutil
 import tempfile
+from typing import TYPE_CHECKING
 
 from dectate import Action
-from webassets import Bundle, Environment
+from webassets.bundle import Bundle
+from webassets.env import Environment
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Generator, Iterable, Mapping, Sequence
+    from typing_extensions import Self
+
+    from dectate import CodeInfo
+
+    from .types import Filter
 
 
 class Asset:
@@ -16,20 +28,26 @@ class Asset:
 
     __slots__ = ("name", "assets", "filters")
 
-    def __init__(self, name, assets, filters):
+    def __init__(
+        self,
+        name: str,
+        assets: Sequence[str],
+        filters: Mapping[str, Filter | None] | None,
+    ) -> None:
         self.name = name
-        self.assets = assets
-        self.filters = filters
+        self.assets = tuple(assets)
+        self.filters = dict(filters) if filters else {}
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         return (
-            self.name == self.name
-            and self.assets == self.assets
-            and self.filters == self.filters
+            isinstance(other, self.__class__)
+            and self.name == other.name
+            and self.assets == other.assets
+            and self.filters == other.filters
         )
 
     @property
-    def is_pure(self):
+    def is_pure(self) -> bool:
         """Returns True if this asset is "pure".
 
         Pure assets are assets which consist of a single file or a set of
@@ -40,59 +58,60 @@ class Asset:
         if self.is_single_file:
             return True
 
-        extensions = {a.split(".")[-1] for a in self.assets}
+        extensions: set[str | None] = {a.split(".")[-1] for a in self.assets}
         extensions |= {None for a in self.assets if "." not in a}
 
         return len(extensions) == 1 and None not in extensions
 
     @property
-    def is_single_file(self):
+    def is_single_file(self) -> bool:
         """Returns True if this repesents a single file asset."""
         return len(self.assets) == 1 and "." in self.assets[0]
 
     @property
-    def path(self):
+    def path(self) -> str:
         """Returns the path to the single file asset if possible."""
         assert self.is_single_file
         return self.assets[0]
 
     @property
-    def extension(self):
+    def extension(self) -> str | None:
         """Returns the extension of this asset if it's a pure asset."""
         if self.is_pure:
             return self.assets[0].split(".")[-1]
+        return None
 
 
 class WebassetRegistry:
     """A registry managing webasset bundles registered through directives."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         #: A list of all paths which should be searched for files (in order)
-        self.paths = []
+        self.paths: list[str] = []
 
         #: The default filters for extensions. Each extension has a webassets
         #: filter string associated with it. (e.g. {'js': 'rjsmin'})
-        self.filters = {}
+        self.filters: dict[str, Filter | None] = {}
 
         #: The extension the filter at self.filters[key] produces
-        self.filter_product = {}
+        self.filter_product: dict[str, str] = {}
 
         #: :class:`Asset` objects keyed by their name
-        self.assets = {}
+        self.assets: dict[str, Asset] = {}
 
         #: The output path for all bundles (a temporary directory by default)
         self.output_path = temporary_directory = tempfile.mkdtemp()
         atexit.register(shutil.rmtree, temporary_directory)
 
         #: A cache of created bundles
-        self.cached_bundles = {}
+        self.cached_bundles: dict[str, Bundle] = {}
 
         #: The url passed to the webasset environment
         self.url = "assets"
 
         #: more.webasset only publishes js/css files - other file extensions
         #: need to be compiled into either and mapped accordingly
-        self.mapping = {
+        self.mapping: dict[str, str] = {
             "coffee": "js",
             "dust": "js",
             "jst": "js",
@@ -103,7 +122,7 @@ class WebassetRegistry:
             "ts": "js",
         }
 
-    def register_path(self, path):
+    def register_path(self, path: str) -> None:
         """Registers the given path as a path to be searched for files.
 
         The paths are prepended, so each new path has higher precedence than
@@ -113,7 +132,9 @@ class WebassetRegistry:
         assert os.path.isabs(path), "absolute paths only"
         self.paths.insert(0, os.path.normpath(path))
 
-    def register_filter(self, name, filter, produces=None):
+    def register_filter(
+        self, name: str, filter: Filter | None, produces: str | None = None
+    ) -> None:
         """Registers a filter, overriding any existing filter of the same
         name.
 
@@ -121,7 +142,12 @@ class WebassetRegistry:
         self.filters[name] = filter
         self.filter_product[name] = produces or name
 
-    def register_asset(self, name, assets, filters=None):
+    def register_asset(
+        self,
+        name: str,
+        assets: Sequence[str],
+        filters: Mapping[str, Filter | None] | None = None,
+    ) -> None:
         """Registers a new asset."""
 
         assert "." not in name, f"asset names may not contain dots ({name})"
@@ -143,7 +169,7 @@ class WebassetRegistry:
             else:
                 assert asset in self.assets, f"unknown asset {asset}"
 
-    def find_file(self, name):
+    def find_file(self, name: str) -> str:
         """Searches for the given file by name using the current paths."""
 
         if os.path.isabs(name):
@@ -164,13 +190,15 @@ class WebassetRegistry:
 
         raise LookupError(f"Could not find {name} in paths")
 
-    def merge_filters(self, *filters):
+    def merge_filters(
+        self, *filters: Mapping[str, Filter | None] | None
+    ) -> dict[str, Filter | None]:
         """Takes a list of filters and merges them.
 
         The last filter has the highest precedence.
 
         """
-        result = {}
+        result: dict[str, Filter | None] = {}
 
         for filter in filters:
             if filter:
@@ -178,7 +206,9 @@ class WebassetRegistry:
 
         return result
 
-    def get_bundles(self, name, filters=None):
+    def get_bundles(
+        self, name: str, filters: Mapping[str, Filter | None] | None = None
+    ) -> Generator[Bundle]:
         """Yields all the bundles for the given name (an asset)."""
 
         assert name in self.assets, f"unknown asset {name}"
@@ -191,11 +221,13 @@ class WebassetRegistry:
 
         if asset.is_pure:
             if asset.is_single_file:
-                files = (asset.path,)
+                files: Iterable[str] = (asset.path,)
             else:
                 files = (a.path for a in (self.assets[a] for a in asset.assets))
 
-            extension = self.mapping.get(asset.extension, asset.extension)
+            extension = asset.extension
+            assert extension is not None
+            extension = self.mapping.get(extension, extension)
             assert extension in ("js", "css")
 
             yield Bundle(
@@ -207,35 +239,38 @@ class WebassetRegistry:
             for sub in (self.assets[a] for a in asset.assets):
                 yield from self.get_bundles(sub.name, overriding_filters)
 
-    def get_asset_filters(self, asset, filters):
+    def get_asset_filters(
+        self, asset: Asset, filters: Mapping[str, Filter | None]
+    ) -> list[str] | None:
         """Returns the filters used for the given asset."""
 
         if not asset.is_pure:
             return None
 
-        def append_filter(item):
-            str_classes = ("".__class__, b"".__class__, "".__class__)
-
-            if isinstance(item, str_classes):
+        def append_filter(item: Filter | None) -> None:
+            if item is None:
+                pass
+            elif isinstance(item, (str, bytes)):
                 bundle_filters.append(item)
             else:
                 bundle_filters.extend(item)
 
-        bundle_filters = []
+        extension = asset.extension
+        assert extension is not None
+        bundle_filters: list[str] = []
 
-        if filters.get(asset.extension) is not None:
-            append_filter(filters[asset.extension])
+        append_filter(filters.get(extension))
 
         # include the filters for the resulting file to produce a chain
         # of filters (for example React JSX -> Javascript -> Minified)
-        product = self.filter_product.get(asset.extension)
+        product = self.filter_product.get(extension)
 
-        if product and product != asset.extension and product in filters:
-            append_filter(filters[product])
+        if product and product != extension:
+            append_filter(filters.get(product))
 
         return bundle_filters
 
-    def get_environment(self):
+    def get_environment(self) -> Environment:
         """Returns the webassets environment, registering all the bundles."""
 
         debug = os.environ.get("MORE_WEBASSETS_DEBUG", "").lower().strip() in (
@@ -273,7 +308,7 @@ class WebassetRegistry:
                 css_bundle = None
 
             if js_bundle and css_bundle:
-                js_bundle.next_bundle = asset + "_1"
+                js_bundle.next_bundle = asset + "_1"  # type: ignore[attr-defined]
                 env.register(asset, js_bundle)
                 env.register(asset + "_1", css_bundle)
             elif js_bundle:
@@ -285,10 +320,17 @@ class WebassetRegistry:
 
 
 class PathMixin:
-    def absolute_path(self, path):
+    if TYPE_CHECKING:
+        # forward declare CodeInfo
+        @property
+        def code_info(self) -> CodeInfo | None:
+            raise NotImplementedError
+
+    def absolute_path(self, path: str) -> str:
         if os.path.isabs(path):
             return path
         else:
+            assert self.code_info is not None
             return os.path.join(os.path.dirname(self.code_info.path), path)
 
 
@@ -316,18 +358,21 @@ class WebassetPath(Action, PathMixin):
 
     config = {"webasset_registry": WebassetRegistry}
 
-    def identifier(self, webasset_registry):
+    def identifier(self, webasset_registry: WebassetRegistry) -> object:
         return object()
 
-    def absolute_path(self, path):
+    def absolute_path(self, path: str) -> str:
         if os.path.isabs(path):
             return path
         else:
+            assert self.code_info is not None
             return os.path.abspath(
                 os.path.join(os.path.dirname(self.code_info.path), path)
             )
 
-    def perform(self, obj, webasset_registry):
+    def perform(
+        self, obj: Callable[[], str], webasset_registry: WebassetRegistry
+    ) -> None:
         path = self.absolute_path(obj())
         assert os.path.isdir(path), f"'{path}' does not exist"
 
@@ -347,10 +392,12 @@ class WebassetOutput(Action, PathMixin):
 
     group_class = WebassetPath
 
-    def identifier(self, webasset_registry):
+    def identifier(self, webasset_registry: WebassetRegistry) -> type[Self]:
         return self.__class__
 
-    def perform(self, obj, webasset_registry):
+    def perform(
+        self, obj: Callable[[], str], webasset_registry: WebassetRegistry
+    ) -> None:
         webasset_registry.output_path = self.absolute_path(obj())
 
 
@@ -379,14 +426,16 @@ class WebassetFilter(Action):
 
     group_class = WebassetPath
 
-    def __init__(self, name, produces=None):
+    def __init__(self, name: str, produces: str | None = None) -> None:
         self.name = name
         self.produces = produces
 
-    def identifier(self, webasset_registry):
+    def identifier(self, webasset_registry: WebassetRegistry) -> str:
         return self.name
 
-    def perform(self, obj, webasset_registry):
+    def perform(
+        self, obj: Callable[[], Filter], webasset_registry: WebassetRegistry
+    ) -> None:
         webasset_registry.register_filter(self.name, obj(), self.produces)
 
 
@@ -411,13 +460,15 @@ class WebassetMapping(Action):
 
     group_class = WebassetPath
 
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         self.name = name
 
-    def identifier(self, webasset_registry):
+    def identifier(self, webasset_registry: WebassetRegistry) -> str:
         return self.name
 
-    def perform(self, obj, webasset_registry):
+    def perform(
+        self, obj: Callable[[], str], webasset_registry: WebassetRegistry
+    ) -> None:
         webasset_registry.mapping[self.name] = obj()
 
 
@@ -436,10 +487,12 @@ class WebassetUrl(Action):
 
     group_class = WebassetPath
 
-    def identifier(self, webasset_registry):
+    def identifier(self, webasset_registry: WebassetRegistry) -> type[Self]:
         return self.__class__
 
-    def perform(self, obj, webasset_registry):
+    def perform(
+        self, obj: Callable[[], str], webasset_registry: WebassetRegistry
+    ) -> None:
         webasset_registry.url = obj()
 
 
@@ -501,14 +554,18 @@ class Webasset(Action):
     ]
     group_class = WebassetPath
 
-    def __init__(self, name, filters=None):
+    def __init__(
+        self, name: str, filters: Mapping[str, Filter | None] | None = None
+    ) -> None:
         self.name = name
         self.filters = filters
 
-    def identifier(self, webasset_registry):
+    def identifier(self, webasset_registry: WebassetRegistry) -> str:
         return self.name
 
-    def perform(self, obj, webasset_registry):
+    def perform(
+        self, obj: Callable[[], Generator[str]], webasset_registry: WebassetRegistry
+    ) -> None:
         assert inspect.isgeneratorfunction(obj), "webasset expects a generator"
         webasset_registry.register_asset(
             self.name, tuple(asset for asset in obj()), self.filters

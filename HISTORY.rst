@@ -4,6 +4,10 @@ Changelog
 0.5.2 (unreleased)
 ~~~~~~~~~~~~~~~~~~~
 
+- Minor robustness improvements
+
+- Add type hints
+
 - Switch to PEP-420 namespace package
 
 - Drop support for Python below 3.10

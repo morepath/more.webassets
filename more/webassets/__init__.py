@@ -1,1 +1,3 @@
-from more.webassets.core import WebassetsApp  # noqa
+from more.webassets.core import WebassetsApp
+
+__all__ = ("WebassetsApp",)

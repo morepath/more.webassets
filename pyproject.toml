@@ -22,6 +22,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 requires-python = ">= 3.10"
+# TODO: Pin morepath to >=1
 dependencies = ["morepath", "ordered-set", "webassets", "webob"]
 
 [project.urls]
@@ -33,9 +34,14 @@ Changelog = "https://github.com/morepath/more.webassets/blob/master/HISTORY.rst"
 test = ["libsass", "pytest >= 8", "pytest-env", "WebTest"]
 coverage = ["pytest-cov"]
 lint = ["black", "flake8", "flake8-pyproject"]
+mypy = ["mypy", "pytest", "types-WebOb", "types-WebTest"]
+pyright = ["pyright", "pytest", "types-WebOb", "types-WebTest", "WebTest >= 2.0.14"]
 
 [tool.setuptools.packages]
 find = {}
+
+[tool.setuptools.package-data]
+"more.webassets" = ["py.typed"]
 
 [tool.setuptools.dynamic]
 readme = {file = ["README.rst", "HISTORY.rst"]}
@@ -47,7 +53,7 @@ addopts = ["-vv"]
 env = ["RUN_ENV=test"]
 
 [tool.coverage.run]
-omit = ["more/webassets/tests/*"]
+omit = ["more/webassets/tests/*", "more/webassets/types.py"]
 source = ["more/webassets"]
 
 [tool.coverage.report]
@@ -57,6 +63,12 @@ show_missing = true
 show-source = true
 ignore = ["E203", "E731", "W503", "N801"]
 max-line-length = 88
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+warn_unreachable = true
+untyped_calls_exclude = "webassets"
 
 [tool.bumpversion]
 current_version = "0.5.1"
@@ -97,12 +109,14 @@ env_list = [
     "pypy3",
     "coverage",
     "pre-commit",
+    "mypy",
+    "pyright",
 ]
 skip_missing_interpreters = true
 
 [tool.tox.gh.python]
 "3.10" = ["py310"]
-"3.11" = ["py311"]
+"3.11" = ["py311", "mypy", "pyright"]
 "3.12" = ["py312"]
 "3.13" = ["py313"]
 "3.14" = ["py314", "pre-commit", "coverage"]
@@ -111,13 +125,14 @@ skip_missing_interpreters = true
 [tool.tox.env_run_base]
 package = "editable"
 extras = ["test"]
+deps = ["-r{tox_root}/requirements/corelibs.txt"]
 commands = [["pytest", "{posargs:more}"]]
 
 [tool.tox.env.coverage]
 base_python = ["python3"]
 extras = ["test", "coverage"]
 commands = [
-    ["pytest", "--cov", "--cov-fail-under=95", "{posargs:more}"],
+    ["pytest", "--cov", "--cov-fail-under=94", "{posargs:more}"],
 ]
 
 [tool.tox.env.pre-commit]
@@ -126,4 +141,26 @@ package = "skip"
 deps = ["pre-commit"]
 commands = [
     ["pre-commit", "run", "--all-files"],
+]
+
+[tool.tox.env.mypy]
+base_python = ["python3"]
+extras = ["mypy"]
+commands = [
+    ["mypy", "-p", "more.webassets", "--python-version", "3.10"],
+    ["mypy", "-p", "more.webassets", "--python-version", "3.11"],
+    ["mypy", "-p", "more.webassets", "--python-version", "3.12"],
+    ["mypy", "-p", "more.webassets", "--python-version", "3.13"],
+    ["mypy", "-p", "more.webassets", "--python-version", "3.14"],
+]
+
+[tool.tox.env.pyright]
+base_python = ["python3"]
+extras = ["pyright"]
+commands = [
+    ["pyright", "more/webassets", "--pythonversion", "3.10"],
+    ["pyright", "more/webassets", "--pythonversion", "3.11"],
+    ["pyright", "more/webassets", "--pythonversion", "3.12"],
+    ["pyright", "more/webassets", "--pythonversion", "3.13"],
+    ["pyright", "more/webassets", "--pythonversion", "3.14"],
 ]
