@@ -1,14 +1,24 @@
+from __future__ import annotations
+
 import os
 import time
-import webob
-
 from datetime import timedelta
+from typing import TYPE_CHECKING
+from urllib.parse import unquote
+
+import webob.exc
 from webob.static import FileApp
 
-try:
-    from urllib import unquote
-except ImportError:
-    from urllib.parse import unquote
+if TYPE_CHECKING:
+    from collections.abc import Generator
+
+    from webassets.env import Environment
+    from webob import Response as BaseResponse
+
+    from morepath.request import Request
+    from morepath.types import StrPath, Tween
+
+    from .core import IncludeRequest
 
 
 # content types and methods that get handled by the injector/publisher
@@ -16,7 +26,7 @@ CONTENT_TYPES = {"text/html", "application/xhtml+xml"}
 METHODS = {"GET", "POST", "HEAD"}
 
 # arbitrarily define forever as 10 years in the future
-FOREVER = timedelta(days=365 * 10).total_seconds()
+FOREVER = int(timedelta(days=365 * 10).total_seconds())
 
 
 # what separators does this operating system provide that are not a slash?
@@ -26,7 +36,7 @@ _os_alt_seps = {sep for sep in [os.path.sep, os.path.altsep] if sep not in (None
 _insecure_elements = {"..", ".", ""} | _os_alt_seps
 
 
-def is_subpath(directory, path):
+def is_subpath(directory: StrPath, path: StrPath) -> bool:
     """Returns true if the given path is inside the given directory."""
     directory = os.path.join(os.path.realpath(directory), "")
     path = os.path.realpath(path)
@@ -36,7 +46,7 @@ def is_subpath(directory, path):
     return os.path.commonprefix([path, directory]) == directory
 
 
-def has_insecure_path_element(path):
+def has_insecure_path_element(path: str) -> bool:
     """Returns true if the given path contains an insecure path element.
     That is '..' or '.' or ''
     """
@@ -49,12 +59,12 @@ def has_insecure_path_element(path):
 class InjectorTween:
     """Injects the webasset urls into the response."""
 
-    def __init__(self, environment, handler):
+    def __init__(self, environment: Environment, handler: Tween) -> None:
         self.environment = environment
         self.handler = handler
-        self._urls = {}
+        self._urls: dict[str, list[str]] = {}
 
-    def urls_by_resource(self, resource):
+    def urls_by_resource(self, resource: str) -> list[str]:
         if self.environment.debug or resource not in self._urls:
             self._urls[resource] = []
 
@@ -69,7 +79,9 @@ class InjectorTween:
 
         return self._urls[resource]
 
-    def urls_to_inject(self, request, suffix=None):
+    def urls_to_inject(
+        self, request: IncludeRequest, suffix: str | None = None
+    ) -> Generator[str]:
         for resource in request.included_assets:
             for url in self.urls_by_resource(resource):
                 filename = url.split("?")[0]
@@ -79,7 +91,7 @@ class InjectorTween:
 
                 yield "/" + url
 
-    def __call__(self, request):
+    def __call__(self, request: IncludeRequest) -> BaseResponse:
         response = self.handler(request)
 
         if request.method not in METHODS:
@@ -120,16 +132,17 @@ class PublisherTween:
 
     """
 
-    def __init__(self, environment, handler):
+    def __init__(self, environment: Environment, handler: Tween) -> None:
         self.environment = environment
         self.handler = handler
 
-    def __call__(self, request):
+    def __call__(self, request: Request) -> BaseResponse:
         publisher_signature = request.path_info_peek()
 
         if publisher_signature != self.environment.url:
             return self.handler(request)
 
+        assert publisher_signature is not None
         subpath = request.path_info.replace(publisher_signature, "").strip("/")
         subpath = unquote(subpath)
 

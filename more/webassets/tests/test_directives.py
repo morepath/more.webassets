@@ -1,30 +1,37 @@
-import morepath
+from __future__ import annotations
+
 import os.path
+from typing import TYPE_CHECKING
+
+import morepath
 
 from more.webassets import WebassetsApp
 from more.webassets.directives import Asset
 
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
-def test_webasset_path(current_path):
+
+def test_webasset_path(current_path: str) -> None:
     current_path = os.path.dirname(os.path.realpath(__file__))
 
     class App(WebassetsApp):
         pass
 
     @App.webasset_path()
-    def get_path():
+    def get_path() -> str:
         return "./fixtures"
 
     @App.webasset_path()
-    def get_overlapping_path():
+    def get_overlapping_path() -> str:
         return os.path.join(current_path, "./fixtures")
 
     @App.webasset_path()
-    def get_current_path():
+    def get_current_path() -> str:
         return "."
 
     @App.webasset_path()
-    def get_parent_path():
+    def get_parent_path() -> str:
         return ".."
 
     morepath.commit(App)
@@ -39,12 +46,12 @@ def test_webasset_path(current_path):
     ]
 
 
-def test_webasset_relative(current_path):
+def test_webasset_relative(current_path: str) -> None:
     class App(WebassetsApp):
         pass
 
     @App.webasset_path()
-    def get_relative_path():
+    def get_relative_path() -> str:
         return "fixtures"
 
     morepath.commit(App)
@@ -54,7 +61,7 @@ def test_webasset_relative(current_path):
     ]
 
 
-def test_webasset_path_inheritance(tempdir, current_path):
+def test_webasset_path_inheritance(tempdir: str, current_path: str) -> None:
     os.mkdir(os.path.join(tempdir, "A"))
     os.mkdir(os.path.join(tempdir, "B"))
     os.mkdir(os.path.join(tempdir, "C"))
@@ -63,28 +70,28 @@ def test_webasset_path_inheritance(tempdir, current_path):
         pass
 
     @A.webasset_path()
-    def get_path_a():
+    def get_path_a() -> str:
         return os.path.join(tempdir, "A")
 
     class B(WebassetsApp):
         pass
 
     @B.webasset_path()
-    def get_path_b():
+    def get_path_b() -> str:
         return os.path.join(tempdir, "B")
 
     class C(B, A):
         pass
 
     @C.webasset_path()
-    def get_path_c():
+    def get_path_c() -> str:
         return os.path.join(tempdir, "C")
 
     class D(A, B):
         pass
 
     @D.webasset_path()
-    def get_path_c_2():
+    def get_path_c_2() -> str:
         return os.path.join(tempdir, "C")
 
     # the order of A and B is defined by the order they are scanned with
@@ -103,19 +110,19 @@ def test_webasset_path_inheritance(tempdir, current_path):
     ]
 
 
-def test_webasset_filter():
+def test_webasset_filter() -> None:
     class Base(WebassetsApp):
         pass
 
     @Base.webasset_filter("js")
-    def get_base_js_filter():
+    def get_base_js_filter() -> str:
         return "jsmin"
 
     class App(WebassetsApp):
         pass
 
     @App.webasset_filter("js")
-    def get_js_filter():
+    def get_js_filter() -> str:
         return "rjsmin"
 
     morepath.commit(App)
@@ -123,24 +130,24 @@ def test_webasset_filter():
     assert App().config.webasset_registry.filters == {"js": "rjsmin"}
 
 
-def test_webasset_filter_chain(fixtures_path):
+def test_webasset_filter_chain(fixtures_path: str) -> None:
     class App(WebassetsApp):
         pass
 
     @App.webasset_path()
-    def get_path():
+    def get_path() -> str:
         return fixtures_path
 
     @App.webasset_filter("js", produces="css")
-    def foo_filter():
+    def foo_filter() -> str:
         return "jsmin"
 
     @App.webasset_filter("css")
-    def bar_filter():
+    def bar_filter() -> str:
         return "cssmin"
 
     @App.webasset("common")
-    def get_common_assets():
+    def get_common_assets() -> Generator[str]:
         yield "jquery.js"
 
     morepath.commit(App)
@@ -151,20 +158,20 @@ def test_webasset_filter_chain(fixtures_path):
     assert common[0].filters[1].name == "cssmin"
 
 
-def test_webasset_directive(tempdir, fixtures_path):
+def test_webasset_directive(tempdir: str, fixtures_path: str) -> None:
     class App(WebassetsApp):
         pass
 
     @App.webasset_path()
-    def get_path():
+    def get_path() -> str:
         return fixtures_path
 
     @App.webasset_output()
-    def get_output_path():
+    def get_output_path() -> str:
         return tempdir
 
     @App.webasset("common")
-    def get_common_assets():
+    def get_common_assets() -> Generator[str]:
         yield "jquery.js"
         yield "underscore.js"
 
@@ -210,31 +217,31 @@ def test_webasset_directive(tempdir, fixtures_path):
     assert underscore[0].contents == (os.path.join(fixtures_path, "underscore.js"),)
 
 
-def test_webasset_override_filters(tempdir, fixtures_path):
+def test_webasset_override_filters(tempdir: str, fixtures_path: str) -> None:
     class App(WebassetsApp):
         pass
 
     @App.webasset_path()
-    def get_path():
+    def get_path() -> str:
         return fixtures_path
 
     @App.webasset_output()
-    def get_output_path():
+    def get_output_path() -> str:
         return tempdir
 
     @App.webasset("jquery")
-    def get_jquery_asset():
+    def get_jquery_asset() -> Generator[str]:
         yield "jquery.js"
 
     @App.webasset_filter("js")
-    def get_js_filter():
+    def get_js_filter() -> str:
         return "rjsmin"
 
     class DebugApp(App):
         pass
 
     @DebugApp.webasset_filter("js")
-    def get_debug_js_filter():
+    def get_debug_js_filter() -> None:
         return None
 
     morepath.commit(DebugApp, App)
@@ -248,31 +255,33 @@ def test_webasset_override_filters(tempdir, fixtures_path):
     assert not bundles[0].filters
 
 
-def test_webasset_override_filter_through_bundle(tempdir, fixtures_path):
+def test_webasset_override_filter_through_bundle(
+    tempdir: str, fixtures_path: str
+) -> None:
     class App(WebassetsApp):
         pass
 
     @App.webasset_path()
-    def get_path():
+    def get_path() -> str:
         return fixtures_path
 
     @App.webasset_output()
-    def get_output_path():
+    def get_output_path() -> str:
         return tempdir
 
     @App.webasset("jquery")
-    def get_jquery_asset():
+    def get_jquery_asset() -> Generator[str]:
         yield "jquery.js"
 
     @App.webasset_filter("js")
-    def get_js_filter():
+    def get_js_filter() -> str:
         return "rjsmin"
 
     class DebugApp(App):
         pass
 
     @DebugApp.webasset("common", filters={"js": None})
-    def get_debug_js_filter():
+    def get_debug_js_filter() -> Generator[str]:
         yield "jquery"
 
     morepath.commit(DebugApp, App)
@@ -286,24 +295,24 @@ def test_webasset_override_filter_through_bundle(tempdir, fixtures_path):
     assert not bundles[0].filters
 
 
-def test_global_filter_is_only_a_default(tempdir, fixtures_path):
+def test_global_filter_is_only_a_default(tempdir: str, fixtures_path: str) -> None:
     class App(WebassetsApp):
         pass
 
     @App.webasset_path()
-    def get_path():
+    def get_path() -> str:
         return fixtures_path
 
     @App.webasset_output()
-    def get_output_path():
+    def get_output_path() -> str:
         return tempdir
 
     @App.webasset("jquery", filters={"js": None})
-    def get_jquery_asset():
+    def get_jquery_asset() -> Generator[str]:
         yield "jquery.js"
 
     @App.webasset_filter("js")
-    def get_js_filter():
+    def get_js_filter() -> str:
         return "rjsmin"
 
     morepath.commit(App)
@@ -313,28 +322,30 @@ def test_global_filter_is_only_a_default(tempdir, fixtures_path):
     assert not bundles[0].filters
 
 
-def test_global_filter_is_only_a_default_with_bundle(tempdir, fixtures_path):
+def test_global_filter_is_only_a_default_with_bundle(
+    tempdir: str, fixtures_path: str
+) -> None:
     class App(WebassetsApp):
         pass
 
     @App.webasset_path()
-    def get_path():
+    def get_path() -> str:
         return fixtures_path
 
     @App.webasset_output()
-    def get_output_path():
+    def get_output_path() -> str:
         return tempdir
 
     @App.webasset("jquery", filters={"js": None})
-    def get_jquery_asset():
+    def get_jquery_asset() -> Generator[str]:
         yield "jquery.js"
 
     @App.webasset("common")
-    def get_common_asset():
+    def get_common_asset() -> Generator[str]:
         yield "jquery"
 
     @App.webasset_filter("js")
-    def get_js_filter():
+    def get_js_filter() -> str:
         return "rjsmin"
 
     morepath.commit(App)
@@ -348,20 +359,20 @@ def test_global_filter_is_only_a_default_with_bundle(tempdir, fixtures_path):
     assert not bundles[0].filters
 
 
-def test_webasset_mixed_bundles(tempdir, fixtures_path):
+def test_webasset_mixed_bundles(tempdir: str, fixtures_path: str) -> None:
     class App(WebassetsApp):
         pass
 
     @App.webasset_path()
-    def get_path():
+    def get_path() -> str:
         return fixtures_path
 
     @App.webasset_output()
-    def get_output_path():
+    def get_output_path() -> str:
         return tempdir
 
     @App.webasset("common")
-    def get_jquery_asset():
+    def get_jquery_asset() -> Generator[str]:
         yield "jquery.js"
         yield "extra.css"
 
@@ -377,24 +388,24 @@ def test_webasset_mixed_bundles(tempdir, fixtures_path):
     assert bundles[1].contents == (os.path.join(fixtures_path, "extra.css"),)
 
 
-def test_webasset_compiled_bundle(tempdir, fixtures_path):
+def test_webasset_compiled_bundle(tempdir: str, fixtures_path: str) -> None:
     class App(WebassetsApp):
         pass
 
     @App.webasset_path()
-    def get_path():
+    def get_path() -> str:
         return fixtures_path
 
     @App.webasset_output()
-    def get_output_path():
+    def get_output_path() -> str:
         return tempdir
 
     @App.webasset_filter("scss")
-    def get_scss_filter():
+    def get_scss_filter() -> str:
         return "libsass"
 
     @App.webasset("theme")
-    def get_jquery_asset():
+    def get_jquery_asset() -> Generator[str]:
         yield "main.scss"
         yield "extra.css"
 
@@ -410,34 +421,34 @@ def test_webasset_compiled_bundle(tempdir, fixtures_path):
     assert bundles[1].contents == (os.path.join(fixtures_path, "extra.css"),)
 
 
-def test_webasset_environment(tempdir, fixtures_path):
+def test_webasset_environment(tempdir: str, fixtures_path: str) -> None:
     class App(WebassetsApp):
         pass
 
     @App.webasset_path()
-    def get_path():
+    def get_path() -> str:
         return fixtures_path
 
     @App.webasset_output()
-    def get_output_path():
+    def get_output_path() -> str:
         return tempdir
 
     @App.webasset_filter("scss")
-    def get_scss_filter():
+    def get_scss_filter() -> str:
         return "libsass"
 
     @App.webasset("js")
-    def get_js_asset():
+    def get_js_asset() -> Generator[str]:
         yield "jquery.js"
         yield "underscore.js"
 
     @App.webasset("css")
-    def get_css_asset():
+    def get_css_asset() -> Generator[str]:
         yield "main.scss"
         yield "extra.css"
 
     @App.webasset("common")
-    def get_common_assets():
+    def get_common_assets() -> Generator[str]:
         yield "js"
         yield "css"
 
