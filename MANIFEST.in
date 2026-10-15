@@ -1,7 +1,3 @@
-recursive-include more *
-recursive-include docs *
-include *.txt
-include *.rst
-global-exclude *.mo
-global-exclude *.pyc
-global-exclude __pycache__/*
+include *.rst *.txt license/LICENSE
+exclude .githooks/pre-commit
+recursive-include src/more/webassets/tests/fixtures *.css *.js *.scss
