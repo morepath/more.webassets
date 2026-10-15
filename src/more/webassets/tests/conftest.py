@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import os.path
-import pytest
-import tempfile
 import shutil
+import tempfile
 from typing import TYPE_CHECKING
+
+import pytest
 
 if TYPE_CHECKING:
     from collections.abc import Generator

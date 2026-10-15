@@ -13,7 +13,7 @@ from webassets.env import Environment
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Generator, Iterable, Mapping, Sequence
-    from typing_extensions import Self
+    from typing import Self
 
     from dectate import CodeInfo
 
@@ -26,7 +26,7 @@ class Asset:
 
     """
 
-    __slots__ = ("name", "assets", "filters")
+    __slots__ = ("assets", "filters", "name")
 
     def __init__(
         self,
@@ -292,17 +292,15 @@ class WebassetRegistry:
             css = tuple(b for b in bundles if b.output.endswith(".css"))
 
             if js:
-                js_bundle = (
-                    len(js) == 1 and js[0] or Bundle(*js, output=f"{asset}.bundle.js")
+                js_bundle = (len(js) == 1 and js[0]) or Bundle(
+                    *js, output=f"{asset}.bundle.js"
                 )
             else:
                 js_bundle = None
 
             if css:
-                css_bundle = (
-                    len(css) == 1
-                    and css[0]
-                    or Bundle(*css, output=f"{asset}.bundle.css")
+                css_bundle = (len(css) == 1 and css[0]) or Bundle(
+                    *css, output=f"{asset}.bundle.css"
                 )
             else:
                 css_bundle = None

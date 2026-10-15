@@ -4,7 +4,6 @@ import os.path
 from typing import TYPE_CHECKING
 
 import morepath
-
 from more.webassets import WebassetsApp
 from more.webassets.directives import Asset
 

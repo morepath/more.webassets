@@ -1,23 +1,25 @@
 from __future__ import annotations
 
+import os
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING
+
+import pytest
+from webtest import TestApp as Client
+
 import more.webassets
 import morepath
-import os
-import pytest
-
-from datetime import datetime, timezone
 from more.webassets import WebassetsApp
-from more.webassets.tweens import is_subpath, has_insecure_path_element
-from typing import TYPE_CHECKING
-from webtest import TestApp as Client
+from more.webassets.tweens import has_insecure_path_element, is_subpath
 
 if TYPE_CHECKING:
     from collections.abc import Generator
+
     from more.webassets.core import IncludeRequest
 
 
 def utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def prepare_fixtures(directory: str) -> None:

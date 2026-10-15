@@ -12,11 +12,11 @@ from webob.static import FileApp
 if TYPE_CHECKING:
     from collections.abc import Generator
 
-    from webassets.env import Environment
     from webob import Response as BaseResponse
 
     from morepath.request import Request
     from morepath.types import StrPath, Tween
+    from webassets.env import Environment
 
     from .core import IncludeRequest
 
@@ -38,12 +38,19 @@ _insecure_elements = {"..", ".", ""} | _os_alt_seps
 
 def is_subpath(directory: StrPath, path: StrPath) -> bool:
     """Returns true if the given path is inside the given directory."""
-    directory = os.path.join(os.path.realpath(directory), "")
+    directory = os.path.realpath(directory)
     path = os.path.realpath(path)
 
-    # return true, if the common prefix of both is equal to directory
-    # e.g. /a/b/c/d.rst and directory is /a/b, the common prefix is /a/b
-    return os.path.commonprefix([path, directory]) == directory
+    # the directory itself is not inside of itself
+    if path == directory:
+        return False
+
+    # return true, if the common path of both is equal to directory
+    # e.g. /a/b/c/d.rst and directory is /a/b, the common path is /a/b
+    try:
+        return os.path.commonpath([path, directory]) == directory
+    except ValueError:  # e.g. paths on different drives on Windows
+        return False
 
 
 def has_insecure_path_element(path: str) -> bool:
