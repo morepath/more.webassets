@@ -2,9 +2,6 @@
    :target: https://github.com/morepath/more.webassets/actions?workflow=CI
    :alt: CI Status
 
-.. image:: https://coveralls.io/repos/github/morepath/more.webassets/badge.svg?branch=master
-    :target: https://coveralls.io/github/morepath/more.webassets?branch=master
-
 .. image:: https://img.shields.io/pypi/v/more.webassets.svg
   :target: https://pypi.org/project/more.webassets/
 
@@ -120,7 +117,7 @@ Install tox and run it::
 
 Limit the tests to a specific python version::
 
-    tox -e py311
+    tox -e py314
 
 Conventions
 -----------
