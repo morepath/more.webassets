@@ -15,13 +15,20 @@ from more.webassets import WebassetsApp
 from more.webassets.tweens import has_insecure_path_element, is_subpath
 
 if TYPE_CHECKING:
-    from collections.abc import Generator
+    from collections.abc import Generator, Iterable
 
     from more.webassets.core import IncludeRequest
 
 
 def utcnow() -> datetime:
     return datetime.now(UTC)
+
+
+def symlink(source: str, link: str) -> None:
+    try:
+        os.symlink(source, link)
+    except (OSError, NotImplementedError):
+        pytest.skip("symlinks are not supported")
 
 
 def include_url(*bundles: str) -> str:
@@ -146,10 +153,24 @@ def spawn_test_app(tempdir: str) -> WebassetsApp:
         request.include("common")
         return html
 
+    @App.view(model=Root, name="no-content")
+    def no_content(self: Root, request: IncludeRequest) -> morepath.Response:
+        request.include("common")
+        return morepath.Response(status=204)
+
     @App.html(model=Root, name="alljs")
     def alljs(self: Root, request: IncludeRequest) -> str:
         request.include("common")
         request.include("extra")
+        return html
+
+    @App.html(model=Root, name="include")
+    def include(self: Root, request: IncludeRequest) -> str:
+        # includes every `bundle` query parameter, in the order given
+        for bundle in request.params.getall("bundle"):
+            if isinstance(bundle, str):
+                request.include(bundle)
+
         return html
 
     morepath.scan(more.webassets)
@@ -265,6 +286,24 @@ def test_publish_webassets(tempdir: str) -> None:
     assert response.content_type == "text/css"
 
 
+def test_publish_webassets_not_modified(tempdir: str) -> None:
+    client = Client(spawn_test_app(tempdir))
+
+    url = "/assets/common.bundle.js?ddc71aa3"
+
+    client.get("?bundle=common")
+
+    response = client.get(url)
+    assert response.status_code == 200
+    assert response.expires is not None
+
+    # the long lived cache headers are only added to successful responses
+    last_modified = response.headers["Last-Modified"]
+    response = client.get(url, headers={"If-Modified-Since": last_modified})
+    assert response.status_code == 304
+    assert response.expires is None
+
+
 def test_webassets_unhandled_content_type(tempdir: str) -> None:
     client = Client(spawn_test_app(tempdir))
 
@@ -277,12 +316,82 @@ def test_webassets_unhandled_request_method(tempdir: str) -> None:
     assert "<head></head>" in client.put("/put").text
 
 
+def test_webassets_response_without_content_type(tempdir: str) -> None:
+    client = Client(spawn_test_app(tempdir))
+
+    response = client.get("/no-content")
+
+    assert response.status_code == 204
+    assert response.body == b""
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        # the path is unquoted a second time by the publisher
+        "%252e%252e/secret.js",
+        "%252e/secret.js",
+        "common//jquery.js",
+    ],
+)
+def test_publish_webassets_insecure_path(tempdir: str, path: str) -> None:
+    client = Client(spawn_test_app(tempdir))
+
+    with open(os.path.join(tempdir, "secret.js"), "w") as f:
+        f.write("var secret = true;")
+
+    assert client.get(f"/assets/{path}", expect_errors=True).status_code == 404
+
+
+def test_publish_webassets_symlinked_directory(tempdir: str) -> None:
+    client = Client(spawn_test_app(tempdir))
+
+    outside = os.path.join(tempdir, "outside")
+    os.mkdir(outside)
+
+    with open(os.path.join(outside, "secret.js"), "w") as f:
+        f.write("var secret = true;")
+
+    symlink(outside, os.path.join(tempdir, "output", "link"))
+
+    # files outside of the assets directory are not served, even if they are
+    # reachable through a symlink inside of the assets directory
+    response = client.get("/assets/link/secret.js", expect_errors=True)
+    assert response.status_code == 404
+
+
+def test_publish_webassets_symlinked_file(tempdir: str) -> None:
+    client = Client(spawn_test_app(tempdir))
+
+    output = os.path.join(tempdir, "output")
+
+    with open(os.path.join(output, "real.js"), "w") as f:
+        f.write("var real = true;")
+
+    symlink(os.path.join(output, "real.js"), os.path.join(output, "linked.js"))
+
+    assert client.get("/assets/real.js").text == "var real = true;"
+
+    # symlinks are not served, even if they point to a file in the same directory
+    assert client.get("/assets/linked.js", expect_errors=True).status_code == 404
+
+
 def test_is_subpath(tempdir: str) -> None:
     assert is_subpath("/", "/test")
     assert is_subpath("/asdf", "/asdf/asdf")
     assert not is_subpath("/asdf/", "/asdf")
     assert not is_subpath("/a", "/b")
     assert not is_subpath("/a", "/a/../b")
+
+
+def test_is_subpath_on_different_drives(monkeypatch: pytest.MonkeyPatch) -> None:
+    # on Windows os.path.commonpath raises a ValueError for different drives
+    def commonpath(paths: Iterable[str]) -> str:
+        raise ValueError("Paths don't have the same drive")
+
+    monkeypatch.setattr(os.path, "commonpath", commonpath)
+
+    assert not is_subpath("/a", "/a/b")
 
 
 def test_insecure_path_element() -> None:

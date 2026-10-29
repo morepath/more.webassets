@@ -3,9 +3,11 @@ from __future__ import annotations
 import os.path
 from typing import TYPE_CHECKING
 
+import pytest
+
 import morepath
 from more.webassets import WebassetsApp
-from more.webassets.directives import Asset
+from more.webassets.directives import Asset, WebassetRegistry
 
 if TYPE_CHECKING:
     from collections.abc import Generator
@@ -492,3 +494,105 @@ def test_webasset_environment(tempdir: str, fixtures_path: str) -> None:
     assert e["common_1"].contents[1].output == e["css"].contents[1].output
     assert e["common_1"].contents[1].contents == e["css"].contents[1].contents
     assert len(e["common_1"].urls()) == 1
+
+
+def test_webasset_output_relative(current_path: str) -> None:
+    class App(WebassetsApp):
+        pass
+
+    @App.webasset_output()
+    def get_output_path() -> str:
+        return "bundles"
+
+    morepath.commit(App)
+
+    assert App().config.webasset_registry.output_path == os.path.join(
+        current_path, "bundles"
+    )
+
+
+def test_webasset_mapping() -> None:
+    class App(WebassetsApp):
+        pass
+
+    @App.webasset_mapping("mjs")
+    def get_mjs_mapping() -> str:
+        return "js"
+
+    morepath.commit(App)
+
+    mapping = App().config.webasset_registry.mapping
+
+    assert mapping["mjs"] == "js"
+    # the default mappings are kept
+    assert mapping["scss"] == "css"
+
+
+def test_webasset_url() -> None:
+    class App(WebassetsApp):
+        pass
+
+    @App.webasset_url()
+    def get_url() -> str:
+        return "my-assets"
+
+    morepath.commit(App)
+
+    registry = App().config.webasset_registry
+
+    assert registry.url == "my-assets"
+    assert registry.get_environment().url == "my-assets"
+
+
+def test_asset_extension() -> None:
+    assert Asset("scripts", ["a.js", "b.js"], None).extension == "js"
+    assert Asset("mixed", ["a.js", "b.css"], None).extension is None
+
+
+def test_find_file_absolute_path(fixtures_path: str) -> None:
+    path = os.path.join(fixtures_path, "jquery.js")
+
+    # absolute paths are returned as they are, without searching for them
+    assert WebassetRegistry().find_file(path) == path
+
+
+def test_find_file_searches_each_path_once(
+    tempdir: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    registry = WebassetRegistry()
+    # the same path may be registered more than once
+    registry.paths = [tempdir, tempdir]
+
+    searched: list[str] = []
+
+    def isfile(path: str) -> bool:
+        searched.append(path)
+        return False
+
+    monkeypatch.setattr(os.path, "isfile", isfile)
+
+    with pytest.raises(LookupError, match=r"Could not find missing\.js in paths"):
+        registry.find_file("missing.js")
+
+    assert searched == [os.path.join(tempdir, "missing.js")]
+
+
+def test_get_asset_filters_of_mixed_asset() -> None:
+    registry = WebassetRegistry()
+    registry.register_filter("js", "rjsmin")
+
+    mixed = Asset("mixed", ["a.js", "b.css"], None)
+
+    assert registry.get_asset_filters(mixed, registry.filters) is None
+
+
+def test_get_asset_filters_with_multiple_filters() -> None:
+    registry = WebassetRegistry()
+    registry.register_filter("js", ["jsmin", "rjsmin"])
+
+    asset = Asset("scripts", ["a.js"], None)
+
+    assert registry.get_asset_filters(asset, registry.filters) == [
+        "jsmin",
+        "rjsmin",
+    ]
