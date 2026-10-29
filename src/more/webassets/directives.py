@@ -5,7 +5,7 @@ import inspect
 import os.path
 import shutil
 import tempfile
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from dectate import Action
 from webassets.bundle import Bundle
@@ -17,7 +17,12 @@ if TYPE_CHECKING:
 
     from dectate import CodeInfo
 
-    from .types import Filter
+    from .types import AssetBundle, AssetEnvironment, Filter
+
+# Cast ``webasset`` classes to factories returning the protocols,
+# which describe the part of its API we are using
+create_bundle = cast("Callable[..., AssetBundle]", Bundle)
+create_environment = cast("Callable[..., AssetEnvironment]", Environment)
 
 
 class Asset:
@@ -104,7 +109,7 @@ class WebassetRegistry:
         atexit.register(shutil.rmtree, temporary_directory)
 
         #: A cache of created bundles
-        self.cached_bundles: dict[str, Bundle] = {}
+        self.cached_bundles: dict[str, AssetBundle] = {}
 
         #: The url passed to the webasset environment
         self.url = "assets"
@@ -175,7 +180,7 @@ class WebassetRegistry:
         if os.path.isabs(name):
             return name
 
-        searched = set()
+        searched: set[str] = set()
 
         for path in self.paths:
             if path in searched:
@@ -208,7 +213,7 @@ class WebassetRegistry:
 
     def get_bundles(
         self, name: str, filters: Mapping[str, Filter | None] | None = None
-    ) -> Generator[Bundle]:
+    ) -> Generator[AssetBundle]:
         """Yields all the bundles for the given name (an asset)."""
 
         assert name in self.assets, f"unknown asset {name}"
@@ -230,7 +235,7 @@ class WebassetRegistry:
             extension = self.mapping.get(extension, extension)
             assert extension in ("js", "css")
 
-            yield Bundle(
+            yield create_bundle(
                 *files,
                 filters=self.get_asset_filters(asset, all_filters),
                 output=f"{name}.bundle.{extension}",
@@ -270,7 +275,7 @@ class WebassetRegistry:
 
         return bundle_filters
 
-    def get_environment(self) -> Environment:
+    def get_environment(self) -> AssetEnvironment:
         """Returns the webassets environment, registering all the bundles."""
 
         debug = os.environ.get("MORE_WEBASSETS_DEBUG", "").lower().strip() in (
@@ -278,7 +283,7 @@ class WebassetRegistry:
             "1",
         )
 
-        env = Environment(
+        env = create_environment(
             directory=self.output_path,
             load_path=self.paths,
             url=self.url,
@@ -291,22 +296,25 @@ class WebassetRegistry:
             js = tuple(b for b in bundles if b.output.endswith(".js"))
             css = tuple(b for b in bundles if b.output.endswith(".css"))
 
+            js_bundle: AssetBundle | None = None
+            css_bundle: AssetBundle | None = None
+
             if js:
-                js_bundle = (len(js) == 1 and js[0]) or Bundle(
-                    *js, output=f"{asset}.bundle.js"
+                js_bundle = (
+                    js[0]
+                    if len(js) == 1
+                    else create_bundle(*js, output=f"{asset}.bundle.js")
                 )
-            else:
-                js_bundle = None
 
             if css:
-                css_bundle = (len(css) == 1 and css[0]) or Bundle(
-                    *css, output=f"{asset}.bundle.css"
+                css_bundle = (
+                    css[0]
+                    if len(css) == 1
+                    else create_bundle(*css, output=f"{asset}.bundle.css")
                 )
-            else:
-                css_bundle = None
 
             if js_bundle and css_bundle:
-                js_bundle.next_bundle = asset + "_1"  # type: ignore[attr-defined]
+                js_bundle.next_bundle = asset + "_1"
                 env.register(asset, js_bundle)
                 env.register(asset + "_1", css_bundle)
             elif js_bundle:

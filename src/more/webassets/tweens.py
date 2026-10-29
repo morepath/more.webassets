@@ -16,9 +16,9 @@ if TYPE_CHECKING:
 
     from morepath.request import Request
     from morepath.types import StrPath, Tween
-    from webassets.env import Environment
 
     from .core import IncludeRequest
+    from .types import AssetBundle, AssetEnvironment
 
 
 # content types and methods that get handled by the injector/publisher
@@ -66,7 +66,7 @@ def has_insecure_path_element(path: str) -> bool:
 class InjectorTween:
     """Injects the webasset urls into the response."""
 
-    def __init__(self, environment: Environment, handler: Tween) -> None:
+    def __init__(self, environment: AssetEnvironment, handler: Tween) -> None:
         self.environment = environment
         self.handler = handler
         self._urls: dict[str, list[str]] = {}
@@ -75,7 +75,7 @@ class InjectorTween:
         if self.environment.debug or resource not in self._urls:
             self._urls[resource] = []
 
-            bundle = self.environment[resource]
+            bundle: AssetBundle | None = self.environment[resource]
             while bundle is not None:
                 self._urls[resource].extend(bundle.urls())
 
@@ -139,7 +139,7 @@ class PublisherTween:
 
     """
 
-    def __init__(self, environment: Environment, handler: Tween) -> None:
+    def __init__(self, environment: AssetEnvironment, handler: Tween) -> None:
         self.environment = environment
         self.handler = handler
 
