@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from ordered_set import OrderedSet
-
 from dectate import directive
 from morepath.app import App
 from morepath.core import excview_tween_factory
@@ -46,17 +44,18 @@ class IncludeRequest(Request[_AppT]):
 
     """
 
-    included_assets: OrderedSet[str]
+    # dict used as an ordered set; values are unused
+    included_assets: dict[str, None]
 
     # NOTE: Preserve the signature of the super-class, without duplicating it
     if not TYPE_CHECKING:
 
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
-            self.included_assets = OrderedSet()
+            self.included_assets = {}
 
     def include(self, resource: str) -> None:
-        self.included_assets.add(resource)
+        self.included_assets[resource] = None
 
 
 class WebassetsApp(App):

@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import os
+import re
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
+from urllib.parse import urlencode
 
 import pytest
 from webtest import TestApp as Client
@@ -20,6 +22,11 @@ if TYPE_CHECKING:
 
 def utcnow() -> datetime:
     return datetime.now(UTC)
+
+
+def include_url(*bundles: str) -> str:
+    """Returns a url that includes the given bundles, in the given order."""
+    return "/include?" + urlencode([("bundle", bundle) for bundle in bundles])
 
 
 def prepare_fixtures(directory: str) -> None:
@@ -177,6 +184,54 @@ def test_inject_webassets(tempdir: str) -> None:
 
     page = client.get("/alljs").text
     assert page.find("common.bundle.js") < page.find("extra.bundle.js")
+
+
+@pytest.mark.parametrize(
+    ("included", "expected"),
+    [
+        # rendered in inclusion order, not alphabetical or registration order
+        (["common", "extra"], ["common", "extra"]),
+        (["extra", "common"], ["extra", "common"]),
+        # including a bundle more than once is the same as including it once
+        (["common", "common"], ["common"]),
+        # re-including a bundle does not move it to the end
+        (["extra", "common", "extra"], ["extra", "common"]),
+        (["common", "extra", "common"], ["common", "extra"]),
+    ],
+)
+def test_included_assets_order_and_deduplication(
+    tempdir: str, included: list[str], expected: list[str]
+) -> None:
+    client = Client(spawn_test_app(tempdir))
+
+    page = client.get(include_url(*included)).text
+    scripts = re.findall(r'<script [^>]*src="(/assets/[^"?]+)', page)
+
+    assert scripts == [f"/assets/{name}.bundle.js" for name in expected]
+
+
+def test_included_assets_deduplicated_across_requests(tempdir: str) -> None:
+    client = Client(spawn_test_app(tempdir))
+
+    # every request gets its own, initially empty collection of assets
+    first = client.get(include_url("extra")).text
+    second = client.get(include_url("common")).text
+
+    assert "extra.bundle.js" in first
+    assert "common.bundle.js" not in first
+    assert "common.bundle.js" in second
+    assert "extra.bundle.js" not in second
+
+
+def test_included_assets_deduplicated_stylesheets(tempdir: str) -> None:
+    client = Client(spawn_test_app(tempdir))
+
+    page = client.get(include_url("theme", "common", "theme")).text
+
+    assert page.count("theme.bundle.css") == 1
+    assert page.count("common.bundle.js") == 1
+    # stylesheets are injected into the head, scripts at the end of the body
+    assert page.find("theme.bundle.css") < page.find("common.bundle.js")
 
 
 def test_publish_webassets(tempdir: str) -> None:

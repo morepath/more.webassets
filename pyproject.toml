@@ -32,7 +32,6 @@ requires-python = ">= 3.11"
 dependencies = [
     "morepath >= 1.0.0",
     "webassets >= 3.0.0",
-    "ordered-set",
 ]
 
 [project.urls]
