@@ -1,20 +1,65 @@
 Changelog
 ---------
 
-0.5.2 (unreleased)
-~~~~~~~~~~~~~~~~~~~
+1.0.0 (unreleased)
+------------------
 
-- Minor robustness improvements
+- Drop the ordered-set dependency in favor of a plain dict.
 
-- Add type hints
+- Bump ``webassets`` minimum version to 3.0.0.
+
+- Add tests for 100% test coverage.
+
+- Replace ``pyScss`` in test dependencies with ``libsass``.
+
+- Ensure assets are also included in error views. #13 by Cyrill Küttel
+
+- Switch to ``pyproject.toml`` based project setup.
+
+- Integrate ``mypy`` and ``pyright`` type checkers.
+
+- Add type hints.
+
+- Switch to ``pyproject.toml`` based project setup.
 
 - Switch to PEP-420 namespace package
 
-- Drop support for Python below 3.10
+- Switch to ``src-layout`` based file structure.
+
+- Add support for Python 3.11 - 3.15.
+
+- Drop support for Python below 3.11.
+
+- Support Pypy 3.12.
+
+- Switch from black, flake8, isort and pyupgrade to Ruff_ linter and formatter.
+
+  .. _Ruff: https://docs.astral.sh/ruff
+
+- Replace ``pre-commit`` integration with our custom tracked
+  pre-commit git hook for Ruff checks on staged Python files.
+
+- Fix linting and formatting errors.
+
+- Update links in ``README.rst`` and ``directives.py``.
 
 - Use GitHub Actions for CI.
 
-- Ensure assets are also included in error views. #13 by Cyrill Küttel
+- Adjust the deployment strategy:
+  
+  * Move the Pypi upload from ``zest.release`` to ``gh-actions``.
+
+  * Use ``v`` + version as release tags like ``v1.0.0``.
+
+  * So we still use ``zest.release`` but without publishing to Pypi.
+    The Pypi upload is triggered by pushing the new release tag to GitHub.
+    This happens in the Release workflow in ``.github/workflows/release.yml``.
+    With this workflow we get Trusted Publishing with short-lived OIDC tokens
+    that PyPI issues to one specific repository, workflow file and environment (``pypi``).
+    We also get PEP 740 provenance and can set required reviewers for the environment
+    and a ruleset who can create release tags and trigger releases.
+
+- Make an overall cleanup.
 
 
 0.5.1 (2017-07-12)
